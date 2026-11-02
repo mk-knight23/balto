@@ -44,6 +44,21 @@ class TestEvidence(unittest.TestCase):
         self.assertIsNone(event["utc"])
         self.assertEqual(event["timestamp_status"], "invalid")
 
+    def test_invalid_offsets_and_utc_overflow_remain_unresolved(self):
+        sources = [
+            "2026-09-14T12:00:00+05:99",
+            "2026-09-14T12:00:00+24:00",
+            "2026-09-14T12:00:00-0560",
+            "0001-01-01T00:00:00+01:00",
+            "9999-12-31T23:59:59-01:00",
+        ]
+        for source in sources:
+            with self.subTest(source=source):
+                event = analyze(source + " INFO START_CALL")["events"][0]
+                self.assertIsNone(event["utc"])
+                self.assertEqual(event["source_timestamp"], source)
+                self.assertEqual(event["timestamp_status"], "invalid")
+
     def test_evidence_metadata_and_unclassified_lines(self):
         raw = "Sep 14 12:33:06.442 WARN audio-forwarding Ping Pong Monitor timeout  "
         unknown = "  opaque evidence\t"

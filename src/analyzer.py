@@ -30,6 +30,9 @@ def timestamp_metadata(line):
     match = ISO_TIMESTAMP.match(line)
     if match:
         source = match.group(1)
+        offset = re.search(r"([+-])(\d{2}):?(\d{2})$", source)
+        if offset and (int(offset.group(2)) > 23 or int(offset.group(3)) > 59):
+            return {"source_timestamp": source, "utc": None, "timestamp_status": "invalid"}
         try:
             parsed = datetime.fromisoformat(source.replace("t", "T").replace("z", "+00:00").replace("Z", "+00:00"))
         except ValueError:
@@ -39,7 +42,10 @@ def timestamp_metadata(line):
         precision = "microseconds" if parsed.microsecond else "seconds"
         if "." in source and len(source.split(".", 1)[1].split("+", 1)[0].split("-", 1)[0].rstrip("Zz")) == 3:
             precision = "milliseconds"
-        normalized = parsed.astimezone(timezone.utc).isoformat(timespec=precision).replace("+00:00", "Z")
+        try:
+            normalized = parsed.astimezone(timezone.utc).isoformat(timespec=precision).replace("+00:00", "Z")
+        except (ValueError, OverflowError):
+            return {"source_timestamp": source, "utc": None, "timestamp_status": "invalid"}
         return {"source_timestamp": source, "utc": normalized, "timestamp_status": "explicit_timezone"}
     match = SYSLOG_TIMESTAMP.match(line)
     if match:
