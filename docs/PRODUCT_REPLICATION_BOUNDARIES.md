@@ -10,7 +10,7 @@ Verified public sources:
 - https://www.balto.ai/resources/webinars/agent-assist-reimagined/
 - https://www.balto.ai/press/ (official press page has image/media resources)
 
-## What the independent SignalDesk studio demonstrates
+## What the independent Balto studio demonstrates
 - A synthetic intent selector (billing/cancellation/renewal) updating mocked agent guidance and knowledge answer.
 - Manual checklist interaction with visual progress.
 - Mock note generation (no LLM, no audio, no CRM).
