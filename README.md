@@ -1,4 +1,4 @@
-# Balto SignalDesk · Evidence-First Escalation Lab
+# Balto Balto · Evidence-First Escalation Lab
 
 **Independent portfolio demonstration** for the Technical Support & AI Engineer take-home exercise. Not affiliated with Balto, Frontier, or Northwind.
 
