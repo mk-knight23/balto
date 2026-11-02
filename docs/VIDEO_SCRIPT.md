@@ -1,7 +1,7 @@
 # Four-minute product demonstration script
 
 **00:00–00:25 — Opening**
-“I'm presenting SignalDesk, an independent support investigation tool built around a realistic persistent WebSocket escalation. The goal is to make findings reproducible, not to fabricate a diagnosis.”
+“I'm presenting Balto, an independent support investigation tool built around a realistic persistent WebSocket escalation. The goal is to make findings reproducible, not to fabricate a diagnosis.”
 Screen: white/gold hero and incident summary.
 
 **00:25–01:10 — The problem**
