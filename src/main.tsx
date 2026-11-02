@@ -3506,6 +3506,12 @@ function About() {
           >
             GitHub profile <ArrowUpRight size={15} />
           </a>
+          <div className="button-row">
+            <a className="btn secondary" href="https://mkazi.live/" target="_blank" rel="noreferrer">Portfolio <ArrowUpRight size={15} /></a>
+            <a className="btn secondary" href="https://www.linkedin.com/in/kazi-musharraf/" target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight size={15} /></a>
+            <a className="btn secondary" href="https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing" target="_blank" rel="noreferrer">Supporting files <ArrowUpRight size={15} /></a>
+            <a className="btn secondary" href="https://github.com/mk-knight23/balto" target="_blank" rel="noreferrer">Balto case code <ArrowUpRight size={15} /></a>
+          </div>
         </div>
       </Panel>
       <SectionHead
