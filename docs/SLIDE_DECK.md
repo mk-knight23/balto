@@ -1,4 +1,4 @@
-# SignalDesk — 12-slide presentation storyboard
+# Balto — 12-slide presentation storyboard
 
 1. Title and overview
 2. Balto and Frontier research
