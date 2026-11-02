@@ -4,7 +4,7 @@ test("overview, skip link, navigation and real download destinations", async ({
   page,
   request,
 }) => {
-  await page.goto("/");
+  await page.goto("./");
   await expect(
     page.getByRole("heading", {
       name: "A little insight. A lot of possibility.",
@@ -25,13 +25,17 @@ test("overview, skip link, navigation and real download destinations", async ({
     const path = await a.getAttribute("href");
     expect((await request.get(path!)).status()).toBe(200);
   }
-  await page.goto("/library.html");
+  await page.goto("./library.html#slides");
+  await expect(
+    page.getByRole("heading", { name: "Executive presentation", exact: true }),
+  ).toBeVisible();
+  await page.goto("./library.html");
   await expect(
     page.getByRole("heading", { name: "Evidence & downloads", exact: true }),
   ).toBeVisible();
 });
 test("scripted call lifecycle, checklist and summary", async ({ page }) => {
-  await page.goto("/#agent");
+  await page.goto("./#agent");
   await page.getByRole("button", { name: "Start call", exact: true }).click();
   await page
     .getByLabel("Introduce agent & disclose recording", { exact: true })
@@ -58,7 +62,7 @@ test("scripted call lifecycle, checklist and summary", async ({ page }) => {
   ).toBeVisible();
 });
 test("knowledge retrieval and missing information state", async ({ page }) => {
-  await page.goto("/#knowledge");
+  await page.goto("./#knowledge");
   await page.getByLabel("Search knowledge").fill("websocket");
   await expect(
     page.getByRole("heading", { name: "1 relevant articles" }),
@@ -76,7 +80,7 @@ test("knowledge retrieval and missing information state", async ({ page }) => {
   ).toBeVisible();
 });
 test("weighted QA responds to review and weights", async ({ page }) => {
-  await page.goto("/#qa");
+  await page.goto("./#qa");
   await expect(page.locator(".score-circle b")).toHaveText("70/100");
   await page
     .getByLabel("Explicit follow-up commitment", { exact: true })
@@ -92,7 +96,7 @@ test("weighted QA responds to review and weights", async ({ page }) => {
 test("safe diagnostics filters source entries and clears stale input", async ({
   page,
 }) => {
-  await page.goto("/#diagnostics");
+  await page.goto("./#diagnostics");
   await expect(
     page.getByRole("heading", { name: "9 visible events" }),
   ).toBeVisible();
@@ -116,7 +120,7 @@ test("safe diagnostics filters source entries and clears stale input", async ({
 test("hypotheses, synthetic filters and voice handoff work", async ({
   page,
 }) => {
-  await page.goto("/#incident");
+  await page.goto("./#incident");
   await page.getByRole("button", { name: "Hypotheses", exact: true }).click();
   await expect(
     page.getByText("PLAUSIBLE · NOT CALIBRATED PROBABILITY"),
@@ -128,10 +132,10 @@ test("hypotheses, synthetic filters and voice handoff work", async ({
   await expect(
     page.getByText("Request exact local occurrence times", { exact: false }),
   ).toBeVisible();
-  await page.goto("/#insights");
+  await page.goto("./#insights");
   await page.getByLabel("Filter agent").selectOption("Alex");
   await expect(page.locator(".metric strong").first()).toHaveText("32");
-  await page.goto("/#voice");
+  await page.goto("./#voice");
   await page.getByLabel("Voice simulator message").fill("supervisor please");
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   await expect(
@@ -143,7 +147,7 @@ test("hypotheses, synthetic filters and voice handoff work", async ({
 test("presentation keyboard navigation and search focus trap", async ({
   page,
 }) => {
-  await page.goto("/#presentation");
+  await page.goto("./#presentation");
   await expect(page.locator(".slide-stage")).toBeVisible();
   await page.keyboard.press("ArrowRight");
   await expect(page.locator(".slide-footer")).toContainText("2 / 15");
@@ -186,13 +190,13 @@ test("all primary sections render without runtime errors", async ({ page }) => {
     "video",
     "about",
   ]) {
-    await page.goto("/#" + id);
+    await page.goto("./#" + id);
     await expect(page.locator("main h1")).toBeVisible();
   }
   expect(errors).toEqual([]);
 });
 test("responsive layout and accessibility", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("./");
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa"])
     .analyze();
@@ -216,7 +220,7 @@ test("responsive layout and accessibility", async ({ page }) => {
 });
 
 test("investigation decisions survive lab navigation", async ({ page }) => {
-  await page.goto("/#incident");
+  await page.goto("./#incident");
   await page.getByRole("button", { name: "Hypotheses", exact: true }).click();
   await page.getByLabel("Investigation status").selectOption("Test planned");
   await page
@@ -256,7 +260,7 @@ test("all sections fit a mobile viewport", async ({ page }) => {
     "video",
     "about",
   ]) {
-    await page.goto("/#" + id);
+    await page.goto("./#" + id);
     await expect(page.locator("main h1")).toBeVisible();
     expect(
       await page.evaluate(

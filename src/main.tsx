@@ -190,10 +190,20 @@ function SectionHead({
   );
 }
 function App() {
-  const initial = location.pathname.endsWith("library.html")
-    ? "library"
-    : pages.some((p) => p.id === location.hash.slice(1))
-      ? location.hash.slice(1)
+  const legacyRoutes: Record<string, string> = {
+    home: "overview",
+    platform: "products",
+    workspace: "incident",
+    creator: "about",
+    slides: "presentation",
+    research: "products",
+  };
+  const requested =
+    legacyRoutes[location.hash.slice(1)] || location.hash.slice(1);
+  const initial = pages.some((p) => p.id === requested)
+    ? requested
+    : location.pathname.endsWith("library.html")
+      ? "library"
       : "overview";
   const [page, setPage] = useState(initial);
   const [drawer, setDrawer] = useState(false);
@@ -210,7 +220,7 @@ function App() {
   };
   useEffect(() => {
     const h = () => {
-      const id = location.hash.slice(1);
+      const id = legacyRoutes[location.hash.slice(1)] || location.hash.slice(1);
       if (pages.some((p) => p.id === id)) setPage(id);
     };
     const k = (e: KeyboardEvent) => {
