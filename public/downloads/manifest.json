@@ -1,0 +1,98 @@
+[
+  {
+    "file": "architecture.md",
+    "bytes": 1725,
+    "sha256": "a6c2081360f87643c8e721ac1970208e1656dc83fea294f959bdf952a0b30c8f",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "assessment.md",
+    "bytes": 5161,
+    "sha256": "cc5da26f8025b20237fbea775e2c5ede665d3655d591431e8af4c364f6fcb104",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "assessment.pdf",
+    "bytes": 6051,
+    "sha256": "5acbdd1f5d261618014a4fd02b054b909c5bcbec674bb9cadad81b27b2a067f6",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "company-research.md",
+    "bytes": 3447,
+    "sha256": "c94bf2485cf1439270c037b250aff8ec77ba770b4e8adfd77ca3fb3171d75f4a",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "company-research.pdf",
+    "bytes": 4686,
+    "sha256": "edf03be4d1c1862317006f1eeb17eef8410f5cc2b8a79e05e073ceaf3c5c3fa8",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "deployment-guide.md",
+    "bytes": 681,
+    "sha256": "1e75939d5575b849849c58871e61769cffbae548a1c215712e4cde0c0a8084e4",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "engineering-design-notes.md",
+    "bytes": 2610,
+    "sha256": "be76ff4f0b96b0cbfd3f185b1f08a60c54dfb110ecc4a8f674eede67017b0d0b",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "executive-deck.pptx",
+    "bytes": 64861,
+    "sha256": "061ab2fd8188ecd8cc099484e95f1efec4ed095857ebe1bfaba984a92f54dd7b",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "incident-workbook.xlsx",
+    "bytes": 21589,
+    "sha256": "f1c3e85dd69edd8b30fc82ed27ad60b144fc6e5c4010109658808e7cb18ad524",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "notebooklm-video-prompt.md",
+    "bytes": 2219,
+    "sha256": "68bf00b32e54c4b490265e4af2e4703ec3d48df575a56b482b2743fb85051f35",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "readme.md",
+    "bytes": 2470,
+    "sha256": "8138186f883bee16f30b81e204bc57c33b6f5f7b13a653bbe21065bcc219332a",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "slide-content.json",
+    "bytes": 5336,
+    "sha256": "be1875600b55126b644496f90aced4d9f4a0b5b36490eaf81dd09ecde6235659",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "test-evidence.md",
+    "bytes": 1040,
+    "sha256": "6e26f9c2ad085840f11b629c94f95489bca8016a32b30657f405a510a2cfac18",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "video-captions.srt",
+    "bytes": 1052,
+    "sha256": "56e95e3efa7f469a466dd8cecd38076e4eb2fa08812a938a05dc955e3754922b",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "video-script.md",
+    "bytes": 2101,
+    "sha256": "1897d9e22b77e171fa6bfbc9728432e3c4564d12a35fbaa4f20f6624ae544c6f",
+    "updated": "2026-11-03"
+  },
+  {
+    "file": "video-storyboard.md",
+    "bytes": 1492,
+    "sha256": "1a1739b8a5ea52db878149cd7d5029ac5174dc4ec2d916b0edd6cea32b8a8be2",
+    "updated": "2026-11-03"
+  }
+]

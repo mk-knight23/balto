@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "title": "Candidate introduction",
+    "headline": "Kazi Musharraf",
+    "body": "Software Developer & AI Engineer • approximately three years of experience, as supplied by the candidate.",
+    "notes": "An independent candidate demonstration; no affiliation with Balto."
+  },
+  {
+    "id": 2,
+    "title": "Balto company and product understanding",
+    "headline": "A connected contact-center platform",
+    "body": "Official product navigation includes Agent Assist, Insights, QA/QM, Voice Agents, Omnichannel, Coaching and Notes.",
+    "notes": "Source: https://www.balto.ai/ and https://www.balto.ai/docs/ accessed 2026-11-03. Product descriptions are vendor claims."
+  },
+  {
+    "id": 3,
+    "title": "Business context",
+    "headline": "Support needs reproducible evidence",
+    "body": "Reported reconnect banners and missing templates affect agent workflow. Business impact and affected-user scope remain unquantified.",
+    "notes": "Source: docs/ASSESSMENT_REASONING.md. Exercise scenario, not a production incident."
+  },
+  {
+    "id": 4,
+    "title": "Problem statement",
+    "headline": "Separate symptoms from causes",
+    "body": "Repeated audio timeouts are visible. The cause and connection to template disappearance remain unproven.",
+    "notes": "Source: data/example.log lines 1, 4, 8."
+  },
+  {
+    "id": 5,
+    "title": "Technical system architecture",
+    "headline": "Two connection paths",
+    "body": "Audio-forwarding transports audio; the control path carries application state. Correlate both paths before assigning a shared cause.",
+    "notes": "Conceptual model from supplied assessment; not verified proprietary Balto architecture."
+  },
+  {
+    "id": 6,
+    "title": "Log evidence",
+    "headline": "Nine supplied lines",
+    "body": "Three audio timeouts, a control close/reconnect pair, one duplicate socket, two CHECK_START_CALL entries and one START_CALL.",
+    "notes": "Source: data/example.log L1-L9. Times preserve source values; year and timezone are absent. Reconnect interval is 3.203 seconds for the adjacent pair only."
+  },
+  {
+    "id": 7,
+    "title": "Hypothesis evaluation",
+    "headline": "Compare tests, not probabilities",
+    "body": "VPN/proxy behavior; endpoint runtime stalls; reconnect/session handling; backend instability. None is confirmed.",
+    "notes": "Each explanation requires additional evidence. Confidence categories are qualitative."
+  },
+  {
+    "id": 8,
+    "title": "Diagnostics strategy",
+    "headline": "Change one variable at a time",
+    "body": "Customer timestamps and client logs → approved IT network comparison → socket close reasons and session correlation → engineering reproduction.",
+    "notes": "No request to bypass corporate security. Preserve baseline and rollback."
+  },
+  {
+    "id": 9,
+    "title": "Proposed solution",
+    "headline": "An evidence investigation workspace",
+    "body": "Normalize logs, expose line references, filter events, compare hypotheses and draft human-reviewed updates.",
+    "notes": "Local deterministic prototype. Production integrations require authorization, access control and validation."
+  },
+  {
+    "id": 10,
+    "title": "Working engineering demonstration",
+    "headline": "Use the supplied excerpt",
+    "body": "Inspect the browser parser, trace each event to its raw line, then export the structured evidence. Review simulations separately.",
+    "notes": "Demo instructions; execution and release status must be checked against current application and test evidence."
+  },
+  {
+    "id": 11,
+    "title": "Verification plan",
+    "headline": "Verify both symptoms",
+    "body": "Confirm template visibility, audio health and expected recording outcomes across representative calls and an agreed observation period.",
+    "notes": "Proposed closure criteria; no fix or customer outcome is claimed."
+  },
+  {
+    "id": 12,
+    "title": "Customer communication",
+    "headline": "State what is known",
+    "body": "We found intermittent connection interruptions. The cause and relationship to missing templates remain under investigation.",
+    "notes": "Draft only; human review before sending. Ask for precise occurrence times and exact reinstall error."
+  },
+  {
+    "id": 13,
+    "title": "Security and responsible AI",
+    "headline": "Keep evidence under human control",
+    "body": "Local parsing, bounded input, sanitized exports, explicit uncertainty and no browser API secrets. Review generated summaries.",
+    "notes": "No model or external API is implied. Production auth, retention and service integrations remain separate work."
+  },
+  {
+    "id": 14,
+    "title": "Roadmap",
+    "headline": "Measure before scaling",
+    "body": "Validate local evidence lab → pilot with authorized data → assess integrations and access controls → measure triage and reopening baselines.",
+    "notes": "Proposed roadmap; no fabricated ROI, shipping date or customer metrics."
+  },
+  {
+    "id": 15,
+    "title": "Why my skills fit the role",
+    "headline": "Show the work",
+    "body": "Python and frontend engineering, source-grounded troubleshooting, automation, documentation and clear customer communication.",
+    "notes": "Candidate positioning based on this project and user-provided experience; no invented certifications or employment history."
+  }
+]

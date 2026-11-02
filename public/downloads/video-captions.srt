@@ -1,0 +1,23 @@
+1
+00:00:00,000 --> 00:00:25,000
+This independent candidate demonstration helps support engineers trace findings to evidence.
+
+2
+00:00:25,000 --> 00:01:10,000
+Reconnect banners and missing templates require investigation of both control and audio connections. A speed test does not establish persistent connection health.
+
+3
+00:01:10,000 --> 00:02:05,000
+The supplied excerpt has nine lines: three audio timeouts, one control reconnect pair, a duplicate socket, two checks and one call start. Root cause remains unconfirmed.
+
+4
+00:02:05,000 --> 00:02:50,000
+Use the local parser to classify recognized events and review their source lines. The demonstration is deterministic; no Balto API or live model is connected.
+
+5
+00:02:50,000 --> 00:03:35,000
+Collect approved network comparisons, client logs and socket close reasons. Change one variable at a time and preserve rollback.
+
+6
+00:03:35,000 --> 00:04:00,000
+Verify template visibility, stable audio, expected recordings and customer confirmation. No resolution or customer outcome has been claimed.
