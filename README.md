@@ -1,12 +1,114 @@
-# Balto Lab — engineering meets empathy
+<div align="center">
 
-An independent contact-center engineering portfolio by **Kazi Musharraf — Software Developer & AI Engineer**. Inspired by publicly documented Balto capabilities; not affiliated with or endorsed by Balto. All calls are scripted, analytics are synthetic, and investigation findings cite the supplied exercise evidence.
+# BALTO LAB
+### Technical Escalation × AI Engineering · Candidate Case Study
 
-## Run
+**A product-aware, evidence-first engineering portfolio built by [Kazi Musharraf](https://mkazi.live/).**
+
+[![Live experience](https://img.shields.io/badge/Explore-Live_Interactive_Experience-C79A4D?style=for-the-badge)](https://mk-knight23.github.io/balto/)
+[![Assessment](https://img.shields.io/badge/Read-Technical_Assessment-20355B?style=for-the-badge)](https://mk-knight23.github.io/balto/#assessment)
+[![Files](https://img.shields.io/badge/Explore-Submission_Files-4B6584?style=for-the-badge)](https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing)
+
+*Independent educational / hiring work sample. Not an official Balto application or an endorsed Balto product.*
+
+</div>
+
+---
+
+## 🚀 Start here — review the case in under five minutes
+
+| Priority | Link | What a reviewer will find |
+| --- | --- | --- |
+| **01 · Balto live website** | **[Launch interactive experience ↗](https://mk-knight23.github.io/balto/)** | Product intelligence, Agent Assist simulation, escalation lab, support workflows |
+| **02 · Technical assessment** | **[Read the five answers ↗](https://mk-knight23.github.io/balto/#assessment)** | Observations, hypotheses, next checks, resolution/verification, customer update |
+| **03 · Source code** | **[Explore this repository ↗](https://github.com/mk-knight23/balto)** | React/TypeScript, Python parser, tests, architecture and design notes |
+| **04 · Files and supporting assets** | **[Google Drive folder ↗](https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing)** | User-uploaded supporting materials; verify individual file access before sharing |
+| **05 · Presentation** | **[Interactive slide deck ↗](https://mk-knight23.github.io/balto/#presentation)** | Technical storyline, diagrams, speaker notes and editable PPTX download |
+| **06 · PDF / PowerPoint / Excel downloads** | **[Evidence library ↗](https://mk-knight23.github.io/balto/#library)** | Project-hosted PDF, presentation, workbook and documentation |
+| **07 · Video production** | **[NotebookLM script and storyboard ↗](https://mk-knight23.github.io/balto/#video)** | Video-generation prompt, script and captions — *not an actual rendered video* |
+
+> **Submission instructions:** The original hiring assignment requests **one PDF** uploaded through the private Greenhouse portal. This repository and the links above are supplemental evidence, not a replacement for the mandatory PDF.
+
+## 🧭 Case brief: Northwind Services
+
+The provided exercise concerns a remote agent who intermittently sees a reconnecting banner and loses on-screen call templates. Two long-lived connections exist: **control** (settings/templates) and **audio** (call audio). The logs reveal repeat audio WebSocket ping/pong timeouts, a control-socket reconnect, and call-start sequences. They **do not prove a VPN root cause**, a shared failure, or that every call failed to record.
+
+<details>
+<summary><strong>What is confirmed — and what is not</strong></summary>
+
+**Confirmed from the complete supplied assessment excerpt:** audio ping/pong timeouts at **12:33:06, 13:48:39 and 16:12:38 UTC**; a control socket close/re-establish at **12:47:55–12:47:58**; duplicate socket warning at **13:52:10**; and START_CALL events at **16:05 and 16:09**.
+
+**Still unknown:** VPN contribution; whether audio and control share a cause; actual recording outcomes for later CHECK_START_CALL events; client-side socket close codes; and the precise reinstall error.
+
+**Important source distinction:** The repository's `data/example.log` is an abbreviated nine-entry teaching sample, **not** the full assessment excerpt. Its counts should not be substituted for the complete case narrative. The bundled parser intentionally does not invent a year or timezone when source timestamps omit them.
+
+</details>
+
+### Investigation philosophy
+
+```text
+Customer report
+   ↓
+Preserve and normalize evidence
+   ↓
+Control socket  |  Audio socket  |  Call state
+   ↓
+Confirmed facts  ≠  Hypotheses
+   ↓
+Customer + Northwind IT + Engineering
+   ↓
+Controlled test → Repeat calls → Customer confirmation
+```
+
+## 🧪 Interactive experiences
+
+| Area | What can be tried | Accuracy boundary |
+| --- | --- | --- |
+| **Agent Assist** | Eight scripted call scenarios, contextual guidance, state transitions, checklist, simulated summaries | Synthetic conversations; no real-time Balto speech or live tenant |
+| **Knowledge** | Searchable local articles, filters, citations and related results | Local sample content, not a Balto knowledge integration |
+| **Quality Assurance** | Rule-weighted scorecards, evidence review, exports | Illustrative scoring; not an official QA model |
+| **Agentic Insights** | Synthetic tables/charts with filters, comparison and CSV | Sample metrics are not real customer outcomes |
+| **Voice workflow** | Keyword-driven simulated intent, handoff logic and optional device TTS | No production voice agent |
+| **Escalation & diagnostics** | Timeline, hypothesis tracker, browser-local log parsing, redaction preview, exports | Deterministic analysis, no definitive diagnosis |
+| **Investigation Copilot** | Evidence-linked drafts and human-review workflow | No LLM API connected |
+| **Presentation & downloads** | Keyboard-accessible slides, speaker notes, downloadable files | Video materials are scripts, not a hosted recording |
+
+## 📁 Technical evidence & downloads
+
+**Direct links to actual files hosted in this repository:**
+
+- [Assessment PDF](public/downloads/assessment.pdf) · [Written response](docs/ASSESSMENT_REASONING.md)
+- [Editable PowerPoint](public/downloads/executive-deck.pptx) · [Interactive slides](https://mk-knight23.github.io/balto/#presentation)
+- [Investigation Excel workbook](public/downloads/incident-workbook.xlsx)
+- [Company research PDF](public/downloads/company-research.pdf) · [Research notes](docs/COMPANY_RESEARCH.md)
+- [Architecture / technical design](docs/ARCHITECTURE.md) · [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
+- [Video script](public/downloads/video-script.md) · [NotebookLM prompt](docs/NOTEBOOKLM_VIDEO_PROMPT.md) · [Storyboard](public/downloads/video-storyboard.md)
+- [Python analyzer](src/analyzer.py) · [Python tests](tests/test_analyzer.py) · [Frontend tests](src/domain.test.ts)
+- [Source-grounded slide content](public/downloads/slide-content.json) · [Download manifest](public/downloads/manifest.json)
+
+**Additional submitted files:** [Google Drive supporting folder ↗](https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing). The specific final three-page assessment and third-party presentation uploads may differ from older files in the repository. Use the Greenhouse-uploaded PDF as the authoritative assessment and confirm the Drive folder is shared with anyone who has the link.
+
+## 👨‍💻 About the creator
+
+**Kazi Musharraf** · Software Developer & AI Engineer · Approximately three years of software development experience.
+
+I created this independent project to demonstrate something beyond a written answer: how I gather evidence, maintain uncertainty, build reproducible tooling, and communicate an escalation without overpromising.
+
+**Professional profiles**
+
+| Portfolio | GitHub | LinkedIn |
+| --- | --- | --- |
+| 🌐 **[mkazi.live ↗](https://mkazi.live/)** | 💻 **[mk-knight23 ↗](https://github.com/mk-knight23)** | 🤝 **[Kazi Musharraf ↗](https://www.linkedin.com/in/kazi-musharraf/)** |
+
+**Why this fits the role:** observable Python and frontend code, tests, deliberate product research, analysis of two WebSocket channels, actionable customer/IT/Engineering questions and a customer-friendly status update. These are work-sample demonstrations, **not claims of prior Balto employment**.
+
+## 🛠️ Run it yourself
 
 Requires Node.js 22+ (CI uses Node 24) and Python 3.12+.
 
 ```bash
+git clone https://github.com/mk-knight23/balto.git
+cd balto
 npm ci
 npm run dev
 npm test
@@ -17,45 +119,38 @@ npx playwright install chromium
 npx playwright test
 ```
 
-Vite serves the workspace at http://localhost:5173. Build output is `dist/`. `index.html` and `library.html` remain supported, with relative assets for `/balto/` hosting. Original HTML and documentation are preserved in `public/legacy/` for historical reference.
+The development site runs at `http://localhost:5173`. Vite outputs to `dist/`; the GitHub Pages workflow publishes that build. `index.html` and `library.html` remain supported routes.
 
-## Working areas
+<details>
+<summary><strong>Architecture and implementation details</strong></summary>
 
-- Executive overview and official-source product capability matrix.
-- Eight scripted Agent Assist scenarios with start/pause/resume/end state transitions, progressive transcripts, contextual guidance, user checklist, call summary and JSON export.
-- Seven local knowledge articles with search, categories, citations, source previews, related articles and session search history.
-- QA studio with visible weighted rules, phrase evidence, adjustable weights, human overrides/review and evaluation export.
-- Synthetic insights with 96 reproducible rows, date/agent/scenario filters, comparison, intent distribution, sorting, row drilldown and CSV export.
-- Voice workflow with keyword intent rules, local knowledge lookup, clarification, human handoff recommendations and user-initiated device speech synthesis.
-- Escalation workspace with exact line references, hypotheses, decision tree, session decision history and diagnostic criteria.
-- Safe browser-local diagnostics with log upload/paste, source preservation, explicit-timezone normalization, channel/severity filters, search, partial anonymization preview and JSON/CSV export.
-- Deterministic investigation drafts with evidence references and a human-review state. No LLM is connected.
-- Technical assessment, architecture, coaching exercises, 15-slide keyboard-accessible presentation, actual PDFs/PPTX/XLSX, and a video production workspace.
-- Global search (Ctrl/Cmd+K), skip link, modal focus handling, responsive drawer, reduced-motion and print styles.
+- `src/main.tsx`: React application, interactive views, navigation and state.
+- `src/domain.ts`: event parsing, scripted scenarios, QA rules, sample data, exports.
+- `src/analyzer.py`: standard-library Python CLI, deterministic log extraction.
+- `public/downloads/`: real binary reports, deck, spreadsheet and source material.
+- `docs/`: case reasoning, research, constraints, implementation and validation.
+- `e2e/`: browser journeys, downloads, accessibility and responsive testing.
+- `.github/workflows/`: CI and static Pages deployment.
+- `public/legacy/`: historical implementation retained for comparison; not the active application.
 
-## Evidence integrity
+</details>
 
-`data/example.log` contains **nine entries**: 3 audio timeouts, 1 control disconnect, 1 control reconnect, 1 duplicate socket, 2 CHECK_START_CALL and 1 START_CALL. The older assessment prose mentions a second START_CALL at 16:09:40; that event is absent from this excerpt and is excluded from the current findings. Source lines contain no year/timezone. The older assessment uses UTC by convention; the parsers leave these timestamps unresolved rather than inventing metadata.
+## ✅ Validation, security and limitations
 
-The 3.203-second control reconnect interval is directly calculable within the same source date. No causal link between audio timeouts and missing templates is established. VPN involvement, recording failure, and a software defect remain unproven.
+The implementation includes TypeScript and Python unit tests, Playwright browser tests, GitHub Actions and an accessibility-check script. **Review current [Actions results](https://github.com/mk-knight23/balto/actions)** for the authoritative latest outcome; a green badge on an older commit does not prove a current build.
 
-## Deployment
+The app uses local mock data; no customer API access, production LLM, server-side transcription or CRM integrations are claimed. Log input is restricted; partial redaction is not a substitute for a real privacy review. CSV output includes spreadsheet-injection precautions. Recorded-video content has not been verified; the repository offers storyboard, subtitles and prompt files.
 
-`.github/workflows/pages.yml` tests and builds with Node 24, uploads only `dist/`, then deploys to the existing GitHub Pages destination on pushes to `main`. `.github/workflows/ci.yml` checks TypeScript production build, frontend domain tests and Python tests. The Playwright suite can run locally or against an explicit deployment using `BALTO_TEST_URL`.
+Official Balto references: [Balto AI](https://www.balto.ai/) · [Docs](https://www.balto.ai/docs/). All trademarks remain with their owners.
 
-## Files and source boundaries
+---
 
-- `src/main.tsx`: UI and workspace state.
-- `src/domain.ts`: parser, finite call state rules, safe CSV, local articles, scripted scenarios, deterministic synthetic dataset.
-- `src/analyzer.py`: standard-library Python parser and CLI.
-- `public/downloads/`: genuine binary deliverables, shared slide content, source-grounded research and production materials.
-- `e2e/`: browser journeys, downloads, responsive layout, and automated accessibility checks.
-- `docs/IMPLEMENTATION_PLAN.md`, `docs/UPGRADE_STATUS.md`: scope, evidence correction and limitations.
+<div align="center">
 
-## Security and limitations
+### Evidence first. Human review always.
 
-No secrets, account changes, telemetry, production AI, CRM, real-time audio capture or customer data. Uploaded text is parsed locally and never executed; inputs are limited to 1 MiB and 10,000 lines. CSV prefixes are neutralized to reduce spreadsheet formula injection. Redaction covers emails, IPv4 and client IDs only; manually review before sharing. Device speech synthesis is optional and user-initiated. External Google Fonts are requested for typography; system fallbacks apply if unavailable.
+**[Explore the live lab](https://mk-knight23.github.io/balto/)** · **[Read the assessment](https://mk-knight23.github.io/balto/#assessment)** · **[Access supporting files](https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing)**
 
-Video script, storyboard and proposed SRT timings are **not a rendered video**. Synthetic analytics cannot prove customer performance or connection stability. QA phrase matching is not semantic compliance assessment. The editable workbook and presentation are educational artifacts, not production integrations. No scientifically calibrated probabilities or Lighthouse scores are asserted.
+*Made with focused effort by Kazi Musharraf. Independent applicant portfolio.*
 
-Official research sources: [Balto platform](https://www.balto.ai/) and [documentation hub](https://www.balto.ai/docs/). Precise mappings are included in the downloadable research document.
+</div>
