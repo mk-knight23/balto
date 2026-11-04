@@ -94,5 +94,11 @@
     "bytes": 1492,
     "sha256": "1a1739b8a5ea52db878149cd7d5029ac5174dc4ec2d916b0edd6cea32b8a8be2",
     "updated": "2026-11-03"
+  },
+  {
+    "file": "visitor-guide.md",
+    "bytes": 20351,
+    "sha256": "e39135ad9d0cb242c06a379e6414d9de6cc34f10daae74b578505e350d8343ed",
+    "updated": "2026-11-05"
   }
 ]

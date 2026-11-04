@@ -1,3 +1,7 @@
+import { useAppearance } from "./use-appearance";
+import { PageGuide } from "./page-guide";
+import { pageGuides } from "./visitor-guides";
+import { EvidenceSummary } from "./evidence-summary";
 import { ConnectionExplorer } from "./connection-explorer";
 import {
   createEvidenceWorkspace,
@@ -13,6 +17,10 @@ import { extractScenarioQA } from "./scenarios";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  Sun,
+  Moon,
+  Settings2,
+  HelpCircle,
   Activity,
   ArrowUpRight,
   ArrowRight,
@@ -83,14 +91,14 @@ import type { CallState } from "./domain";
 import "./style.css";
 const sections = [
   {
-    group: "WORKSPACE",
+    group: "START HERE",
     items: [
       { id: "overview", label: "Executive overview", icon: LayoutDashboard },
       { id: "products", label: "Product intelligence", icon: Compass },
     ],
   },
   {
-    group: "EXPERIENCE LABS",
+    group: "TRY A SUPPORT TOOL",
     items: [
       { id: "agent", label: "Agent Assist lab", icon: Headphones },
       { id: "knowledge", label: "AI knowledge center", icon: BookOpen },
@@ -101,7 +109,7 @@ const sections = [
     ],
   },
   {
-    group: "ENGINEERING",
+    group: "FOLLOW AN INVESTIGATION",
     items: [
       { id: "incident", label: "Escalation command center", icon: Terminal },
       { id: "diagnostics", label: "WebSocket diagnostics", icon: Network },
@@ -109,7 +117,7 @@ const sections = [
     ],
   },
   {
-    group: "RESOURCES",
+    group: "ABOUT THE PROJECT",
     items: [
       { id: "assessment", label: "Technical assessment", icon: FileText },
       {
@@ -202,6 +210,19 @@ function SectionHead({
   );
 }
 function App() {
+  const { appearance, setAppearance, theme, toggleTheme } = useAppearance();
+  const [pageHelp, setPageHelp] = useState(() => {
+    try {
+      return localStorage.getItem("balto-page-help") !== "off";
+    } catch {
+      return true;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("balto-page-help", pageHelp ? "on" : "off");
+    } catch {}
+  }, [pageHelp]);
   const legacyRoutes: Record<string, string> = {
     home: "overview",
     platform: "products",
@@ -354,13 +375,13 @@ function App() {
               {g.items.map((p) => (
                 <button
                   key={p.id}
+                  data-category={pageGuides[p.id].category}
                   className={"nav-item " + (page === p.id ? "active" : "")}
                   onClick={() => go(p.id)}
                   aria-current={page === p.id ? "page" : undefined}
                 >
                   <Icon icon={p.icon} size={17} />
-                  <span>{p.label}</span>
-                  {p.id === "agent" && <span className="nav-new">LIVE</span>}
+                  <span>{pageGuides[p.id].simpleTitle}</span>
                 </button>
               ))}
             </div>
@@ -396,9 +417,65 @@ function App() {
             </button>
             <span>Workspace</span>
             <ChevronRight size={13} />
-            <b>{current.label}</b>
+            <b>{pageGuides[page].simpleTitle}</b>
           </div>
           <div className="top-actions">
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark"
+                  ? "Switch to light theme"
+                  : "Switch to dark theme"
+              }
+              aria-pressed={theme === "dark"}
+            >
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              <span>{theme === "dark" ? "Light" : "Dark"}</span>
+            </button>
+            <details className="display-settings">
+              <summary aria-label="Display settings">
+                <Settings2 size={18} />
+                <span>Display settings</span>
+              </summary>
+              <div className="display-popover">
+                <strong>Make yourself comfortable</strong>
+                <label>
+                  Color theme
+                  <select
+                    aria-label="Color theme"
+                    value={appearance.theme}
+                    onChange={(e) =>
+                      setAppearance((v) => ({
+                        ...v,
+                        theme: e.target.value as "light" | "dark" | "system",
+                      }))
+                    }
+                  >
+                    <option value="system">Use device setting</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={appearance.effects}
+                    onChange={(e) =>
+                      setAppearance((v) => ({
+                        ...v,
+                        effects: e.target.checked,
+                      }))
+                    }
+                  />
+                  Gentle visual effects
+                </label>
+                <p>
+                  Reduced-motion device settings are always respected. Only
+                  these display preferences are saved.
+                </p>
+              </div>
+            </details>
             <button
               className="global-search"
               aria-label="Search workspace"
@@ -422,9 +499,37 @@ function App() {
           </div>
         </header>
         <main id="main" tabIndex={-1}>
-          <div className="page-content">
+          <div
+            className="page-content"
+            data-category={pageGuides[page].category}
+          >
+            <div className="page-help-bar">
+              <span>
+                <Compass size={15} />{" "}
+                {pageGuides[page].category === "investigate"
+                  ? "Follow the evidence"
+                  : pageGuides[page].category === "practice"
+                    ? "Learn by trying"
+                    : "Explore at your own pace"}
+              </span>
+              <button
+                aria-pressed={pageHelp}
+                onClick={() => setPageHelp((v) => !v)}
+              >
+                <HelpCircle size={16} />
+                {pageHelp ? "Hide page help" : "Show page help"}
+              </button>
+            </div>
             {page === "overview" ? (
-              <Overview go={go} walkthrough={() => setWalk(true)} />
+              <Overview
+                go={go}
+                walkthrough={() => setWalk(true)}
+                guide={
+                  pageHelp ? (
+                    <PageGuide key={page} pageId={page} onNavigate={go} />
+                  ) : null
+                }
+              />
             ) : (
               <>
                 <div className="page-title">
@@ -435,12 +540,12 @@ function App() {
                         ?.group
                     }
                   </div>
-                  <h1>{current.label}</h1>
-                  <p>
-                    {descriptions[page] ||
-                      "Explore the thinking, evidence, and engineering behind this independent project."}
-                  </p>
+                  <h1>{pageGuides[page].simpleTitle}</h1>
+                  <p>{pageGuides[page].technicalTitle}</p>
                 </div>
+                {pageHelp && (
+                  <PageGuide key={page} pageId={page} onNavigate={go} />
+                )}
                 {page === "agent" ? (
                   <AgentLab notify={notify} />
                 ) : page === "knowledge" ? (
@@ -545,12 +650,19 @@ function App() {
             <div className="command-results">
               {pages
                 .filter((p) =>
-                  p.label.toLowerCase().includes(query.toLowerCase()),
+                  [
+                    p.label,
+                    pageGuides[p.id].simpleTitle,
+                    pageGuides[p.id].purpose,
+                  ]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(query.toLowerCase()),
                 )
                 .map((p) => (
                   <button key={p.id} onClick={() => go(p.id)}>
                     <Icon icon={p.icon} />
-                    {p.label}
+                    {pageGuides[p.id].simpleTitle}
                     <ArrowRight size={16} />
                   </button>
                 ))}
@@ -603,35 +715,6 @@ function App() {
     </>
   );
 }
-const descriptions: Record<string, string> = {
-  agent:
-    "A safe place to practice better conversations. Every interaction here is scripted and simulated.",
-  knowledge:
-    "Find the right information, understand the source, and know what remains uncertain.",
-  qa: "Turn a conversation into a transparent, evidence-backed quality evaluation.",
-  insights:
-    "Explore patterns across a reproducible synthetic dataset. No customer performance data.",
-  incident:
-    "The bundled assessment exercise. Imported logs remain separate in Diagnostics and the Copilot.",
-  diagnostics:
-    "Turn raw logs into a clear, traceable event timeline. Files stay in your browser.",
-  copilot:
-    "Structured assistance grounded in the supplied evidence. Deterministic templates; no LLM connected.",
-  voice:
-    "Explore a transparent conversation state machine, from intent to handoff.",
-  presentation:
-    "The project story, from product understanding to verification.",
-  library:
-    "The thinking and supporting artifacts, ready to inspect and download.",
-  products:
-    "Public product capabilities, translated into original, bounded demonstrations.",
-  assessment:
-    "Observations, hypotheses, and the next best questions. Never confuse a clue with a cause.",
-  coaching:
-    "Practice with purpose. Build a coaching plan from visible conversation evidence.",
-  video:
-    "From evidence to narrative. A production workspace for a future recorded demonstration.",
-};
 function Orbit() {
   return (
     <div className="orbit" aria-hidden="true">
@@ -666,9 +749,11 @@ function Orbit() {
 function Overview({
   go,
   walkthrough,
+  guide,
 }: {
   go: (s: string) => void;
   walkthrough: () => void;
+  guide: React.ReactNode;
 }) {
   return (
     <>
@@ -679,27 +764,71 @@ function Overview({
             CONVERSATIONS
           </div>
           <h1>
-            A little insight.
-            <br className="mobile-only" /> A lot of possibility
+            Customer support, explained by doing
             <span className="gold-text">.</span>
           </h1>
           <p>
-            Explore the product. Experience the workflows. Follow the evidence.
+            A guided, independent portfolio by Kazi Musharraf. Learn what the
+            tools do, try a simulated call, or explore an example investigation.
           </p>
         </div>
         <button className="btn secondary tour-btn" onClick={walkthrough}>
           <Play size={14} /> Take a guided tour <ArrowUpRight size={15} />
         </button>
       </div>
+      <div className="journey-grid" aria-label="Choose where to start">
+        {[
+          {
+            id: "products",
+            icon: BookOpen,
+            title: "1. Understand the tools",
+            text: "Learn what each tool helps a support team do.",
+            time: "Start with the basics",
+            category: "learn",
+          },
+          {
+            id: "agent",
+            icon: Headphones,
+            title: "2. Try a customer call",
+            text: "Choose a scenario and see suggestions appear as it plays.",
+            time: "Interactive simulation",
+            category: "practice",
+          },
+          {
+            id: "incident",
+            icon: Search,
+            title: "3. Solve an example problem",
+            text: "Follow the clues, read the logs, and see what remains unknown.",
+            time: "Guided investigation",
+            category: "investigate",
+          },
+        ].map((item) => (
+          <button
+            className="journey-card"
+            data-category={item.category}
+            key={item.id}
+            onClick={() => go(item.id)}
+          >
+            <Icon icon={item.icon} size={26} />
+            <small>{item.time}</small>
+            <h2>{item.title}</h2>
+            <p>{item.text}</p>
+            <span>
+              Start exploring <ArrowRight size={16} />
+            </span>
+          </button>
+        ))}
+      </div>
+      {guide}
       <section className="hero">
         <div className="hero-copy">
           <Pill>
             <Sparkles size={12} /> AN INDEPENDENT BALTO-INSPIRED PROJECT
           </Pill>
           <h2>
-            Where product thinking
+            Try a customer call.
             <br />
-            meets <em>engineering depth.</em>
+            Then <em>follow the evidence.</em>
           </h2>
           <p>
             A hands-on exploration of contact-center AI — from a better agent
@@ -707,8 +836,7 @@ function Overview({
           </p>
           <div className="hero-actions">
             <Button onClick={() => go("agent")}>
-              <Headphones size={16} /> Explore Agent Assist{" "}
-              <ArrowRight size={16} />
+              <Headphones size={16} /> Practice a call <ArrowRight size={16} />
             </Button>
             <button className="text-btn" onClick={() => go("incident")}>
               Open investigation <ArrowUpRight size={16} />
@@ -2409,6 +2537,13 @@ function Diagnostics({
     ) {
       const row = document.getElementById("diagnostic-" + pendingFocus);
       if (row) {
+        for (
+          let ancestor: HTMLElement | null = row;
+          ancestor;
+          ancestor = ancestor.parentElement
+        ) {
+          if (ancestor instanceof HTMLDetailsElement) ancestor.open = true;
+        }
         row.scrollIntoView({ block: "center" });
         setPendingFocus(null);
       }
@@ -2645,6 +2780,13 @@ function Diagnostics({
           CSV
         </Button>
       </div>
+      {!anonymize && (
+        <EvidenceSummary
+          events={parsed}
+          analyzed={workspace.analyzed}
+          onSelectEvidence={onSelectEvidence}
+        />
+      )}
       <Panel>
         <SectionHead
           title={`${displayed.length} visible events`}
@@ -2657,63 +2799,69 @@ function Diagnostics({
             the view. JSON and CSV exports include every filtered entry.
           </div>
         )}
-        <div className="table-scroll">
-          <table className="evidence-table">
-            <thead>
-              <tr>
-                <th>Evidence</th>
-                <th>Source timestamp</th>
-                <th>Channel</th>
-                <th>Severity</th>
-                <th>Exact source / normalized time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleEvents.map((e) => (
-                <tr
-                  key={e.id}
-                  id={"diagnostic-" + e.id}
-                  className={
-                    selectedEvidence === e.id ? "selected-evidence" : ""
-                  }
-                >
-                  <td>
-                    <button
-                      className="text-btn"
-                      aria-label={"Select evidence " + e.id}
-                      onClick={() => onSelectEvidence(e.id)}
-                    >
-                      {e.id}
-                    </button>
-                  </td>
-                  <td>{e.time}</td>
-                  <td>{e.channel}</td>
-                  <td>
-                    <Pill tone={e.severity === "WARN" ? "gold" : "neutral"}>
-                      {e.severity}
-                    </Pill>
-                  </td>
-                  <td>
-                    <code>{previewEvidence(safe(e.raw))}</code>
-                    <small>
-                      {e.utc ||
-                        "UTC unresolved: source lacks explicit year/timezone or timestamp is invalid"}
-                    </small>
-                  </td>
+        <details className="source-details">
+          <summary>Inspect exact source entries</summary>
+          <div className="table-scroll">
+            <table className="evidence-table">
+              <thead>
+                <tr>
+                  <th>Evidence</th>
+                  <th>Source timestamp</th>
+                  <th>Channel</th>
+                  <th>Severity</th>
+                  <th>Exact source / normalized time</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {!displayed.length && (
-            <div className="empty">No events match these filters.</div>
-          )}
-        </div>
+              </thead>
+              <tbody>
+                {visibleEvents.map((e) => (
+                  <tr
+                    key={e.id}
+                    id={"diagnostic-" + e.id}
+                    className={
+                      selectedEvidence === e.id ? "selected-evidence" : ""
+                    }
+                  >
+                    <td>
+                      <button
+                        className="text-btn"
+                        aria-label={"Select evidence " + e.id}
+                        onClick={() => onSelectEvidence(e.id)}
+                      >
+                        {e.id}
+                      </button>
+                    </td>
+                    <td>{e.time}</td>
+                    <td>{e.channel}</td>
+                    <td>
+                      <Pill tone={e.severity === "WARN" ? "gold" : "neutral"}>
+                        {e.severity}
+                      </Pill>
+                    </td>
+                    <td>
+                      <code>{previewEvidence(safe(e.raw))}</code>
+                      <small>
+                        {e.utc ||
+                          "UTC unresolved: source lacks explicit year/timezone or timestamp is invalid"}
+                      </small>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!displayed.length && (
+              <div className="empty">No events match these filters.</div>
+            )}
+          </div>
+        </details>
       </Panel>
       {!anonymize && (
-        <ConnectionExplorer
-          events={parsed}
-          onSelectEvidence={onSelectEvidence}
-        />
+        <details className="advanced-details">
+          <summary>Advanced: connection and session details</summary>
+          <ConnectionExplorer
+            events={parsed}
+            onSelectEvidence={onSelectEvidence}
+          />
+        </details>
       )}
       {anonymize && (
         <div className="notice">
@@ -3044,6 +3192,14 @@ function Slides() {
   );
 }
 const files = [
+  {
+    title: "Visitor guide",
+    desc: "Plain-language help for all 17 pages, three things to try, glossary, and display settings.",
+    name: "visitor-guide.md",
+    updated: "Nov 05, 2026",
+    type: "MD",
+    icon: Compass,
+  },
   {
     title: "Technical assessment",
     desc: "Five answers, nine source entries, hypotheses, and verification criteria.",
@@ -3827,10 +3983,38 @@ function About() {
             GitHub profile <ArrowUpRight size={15} />
           </a>
           <div className="button-row">
-            <a className="btn secondary" href="https://mkazi.live/" target="_blank" rel="noreferrer">Portfolio <ArrowUpRight size={15} /></a>
-            <a className="btn secondary" href="https://www.linkedin.com/in/kazi-musharraf/" target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight size={15} /></a>
-            <a className="btn secondary" href="https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing" target="_blank" rel="noreferrer">Supporting files <ArrowUpRight size={15} /></a>
-            <a className="btn secondary" href="https://github.com/mk-knight23/balto" target="_blank" rel="noreferrer">Balto case code <ArrowUpRight size={15} /></a>
+            <a
+              className="btn secondary"
+              href="https://mkazi.live/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Portfolio <ArrowUpRight size={15} />
+            </a>
+            <a
+              className="btn secondary"
+              href="https://www.linkedin.com/in/kazi-musharraf/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn <ArrowUpRight size={15} />
+            </a>
+            <a
+              className="btn secondary"
+              href="https://drive.google.com/drive/folders/1h9wBimNSyHqrXaHGGsPt8O9si7QqGtDX?usp=sharing"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Supporting files <ArrowUpRight size={15} />
+            </a>
+            <a
+              className="btn secondary"
+              href="https://github.com/mk-knight23/balto"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Balto case code <ArrowUpRight size={15} />
+            </a>
           </div>
         </div>
       </Panel>

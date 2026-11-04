@@ -17,6 +17,8 @@
 
 ## 🚀 Start here — review the case in under five minutes
 
+New to the workspace? Open **Start here**, keep **page help** visible, and choose **Walk me through it** on any tab for three steps and expected results. **Show this control** highlights the relevant control without activating it. Use the top-bar **Dark / Light** switch or **Display settings** to choose your appearance. The [downloadable visitor guide](https://mk-knight23.github.io/balto/downloads/visitor-guide.md) covers all 17 tabs, demo boundaries and a plain-language glossary.
+
 | Priority | Link | What a reviewer will find |
 | --- | --- | --- |
 | **01 · Balto live website** | **[Launch interactive experience ↗](https://mk-knight23.github.io/balto/)** | Product intelligence, Agent Assist simulation, escalation lab, support workflows |

@@ -1,1 +1,36 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#f8f7f4"/><meta name="description" content="An independent engineering portfolio by Kazi Musharraf. Explore contact-center simulations, evidence-first incident investigation, and technical resources."/><title>Balto Lab — Engineering meets empathy</title><link rel="icon" type="image/svg+xml" href="./mark.svg"/></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        var a = localStorage.getItem("balto-theme");
+        var d =
+          a === "dark" ||
+          (a !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = d ? "dark" : "light";
+        document.documentElement.style.colorScheme = d ? "dark" : "light";
+        document.documentElement.dataset.effects =
+          localStorage.getItem("balto-effects") === "off" ? "off" : "on";
+      } catch (e) {
+        document.documentElement.dataset.theme = matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches
+          ? "dark"
+          : "light";
+      }
+    </script>
+    <meta name="theme-color" content="#f8f7f4" />
+    <meta
+      name="description"
+      content="An independent engineering portfolio by Kazi Musharraf. Explore contact-center simulations, evidence-first incident investigation, and technical resources."
+    />
+    <title>Balto Lab — Engineering meets empathy</title>
+    <link rel="icon" type="image/svg+xml" href="./mark.svg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

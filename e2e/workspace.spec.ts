@@ -1,6 +1,18 @@
 import { readFile } from "node:fs/promises";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { pageGuides, glossary } from "../src/visitor-guides";
+
+async function openSourceEntries(page: Page) {
+  const details = page.locator(".source-details");
+  if ((await details.count()) && (await details.getAttribute("open")) === null)
+    await details.locator("summary").click();
+}
+async function openConnectionDetails(page: Page) {
+  const details = page.locator(".advanced-details");
+  if ((await details.count()) && (await details.getAttribute("open")) === null)
+    await details.locator("summary").first().click();
+}
 test("overview, skip link, navigation and real download destinations", async ({
   page,
   request,
@@ -8,7 +20,7 @@ test("overview, skip link, navigation and real download destinations", async ({
   await page.goto("./");
   await expect(
     page.getByRole("heading", {
-      name: "A little insight. A lot of possibility.",
+      name: "Customer support, explained by doing.",
     }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Skip to content" }).focus();
@@ -16,11 +28,11 @@ test("overview, skip link, navigation and real download destinations", async ({
   await expect(page.locator("main")).toBeFocused();
   await expect(
     page.getByRole("heading", {
-      name: "A little insight. A lot of possibility.",
+      name: "Customer support, explained by doing.",
     }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Evidence & downloads", exact: true })
+    .getByRole("button", { name: pageGuides.library.simpleTitle, exact: true })
     .click();
   for (const a of await page.locator("a[download]").all()) {
     const path = await a.getAttribute("href");
@@ -28,11 +40,17 @@ test("overview, skip link, navigation and real download destinations", async ({
   }
   await page.goto("./library.html#slides");
   await expect(
-    page.getByRole("heading", { name: "Executive presentation", exact: true }),
+    page.getByRole("heading", {
+      name: pageGuides.presentation.simpleTitle,
+      exact: true,
+    }),
   ).toBeVisible();
   await page.goto("./library.html");
   await expect(
-    page.getByRole("heading", { name: "Evidence & downloads", exact: true }),
+    page.getByRole("heading", {
+      name: pageGuides.library.simpleTitle,
+      exact: true,
+    }),
   ).toBeVisible();
 });
 test("scripted call lifecycle, checklist and summary", async ({ page }) => {
@@ -131,6 +149,7 @@ test("safe diagnostics filters source entries and clears stale input", async ({
   await expect(
     page.getByRole("heading", { name: "1 visible events" }),
   ).toBeVisible();
+  await openSourceEntries(page);
   await expect(page.locator("td code").last()).toHaveText(
     "<script>alert(1)</script>",
   );
@@ -177,13 +196,19 @@ test("presentation keyboard navigation and search focus trap", async ({
   ).toBeVisible();
   await page
     .getByPlaceholder("Where would you like to go?")
-    .fill("diagnostics");
+    .fill("Analyze your logs");
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "WebSocket diagnostics", exact: true })
+    .getByRole("button", {
+      name: pageGuides.diagnostics.simpleTitle,
+      exact: true,
+    })
     .click();
   await expect(
-    page.getByRole("heading", { name: "WebSocket diagnostics", exact: true }),
+    page.getByRole("heading", {
+      name: pageGuides.diagnostics.simpleTitle,
+      exact: true,
+    }),
   ).toBeVisible();
 });
 test("all primary sections render without runtime errors", async ({ page }) => {
@@ -226,9 +251,15 @@ test("responsive layout and accessibility", async ({ page }) => {
   ).toEqual([]);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Open navigation" }).click();
-  await page.getByRole("button", { name: "Agent Assist lab LIVE" }).click();
+  await page
+    .locator("nav")
+    .getByRole("button", { name: pageGuides.agent.simpleTitle, exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "Agent Assist lab", exact: true }),
+    page.getByRole("heading", {
+      name: pageGuides.agent.simpleTitle,
+      exact: true,
+    }),
   ).toBeVisible();
   expect(
     await page.evaluate(
@@ -245,7 +276,7 @@ test("investigation decisions survive lab navigation", async ({ page }) => {
     .getByRole("button", { name: "Open diagnostics lab", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Escalation command center", exact: true })
+    .getByRole("button", { name: pageGuides.incident.simpleTitle, exact: true })
     .click();
   await page
     .getByRole("button", { name: "Investigation notes", exact: true })
@@ -338,6 +369,7 @@ test("connection explorer shows only defensible timing and exact source", async 
       exact: false,
     }),
   ).toBeVisible();
+  await openConnectionDetails(page);
   await expect(
     page.getByRole("heading", {
       name: "Connection & session explorer",
@@ -434,6 +466,7 @@ test("evidence selection clears filters then scrolls to the correct source", asy
       exact: true,
     })
     .click();
+  await openConnectionDetails(page);
   await page.getByLabel("Filter channel").selectOption("Audio");
   await page
     .locator(".ce-group")
@@ -475,6 +508,7 @@ test("large source keeps exports complete and selection beyond preview limits ac
   expect(data.events).toHaveLength(600);
   expect(data.events[599].raw).toBe("INFO START_CALL target600");
   await page.getByLabel("Search events").fill("target600");
+  await openSourceEntries(page);
   await page
     .getByRole("button", { name: "Select evidence L600", exact: true })
     .click();
@@ -491,4 +525,231 @@ test("large source keeps exports complete and selection beyond preview limits ac
     .getByRole("button", { name: "Open selected source line", exact: true })
     .click();
   await expect(page.locator("#diagnostic-L600")).toBeInViewport();
+});
+
+for (const [id, guide] of Object.entries(pageGuides)) {
+  test(`beginner guide explains ${guide.simpleTitle} and its three steps`, async ({
+    page,
+  }) => {
+    await page.goto(`./#${id}`);
+    const help = page.getByRole("region", {
+      name: `How to use ${guide.simpleTitle}`,
+      exact: true,
+    });
+    await expect(help).toBeVisible();
+    await expect(help).toContainText(guide.purpose);
+    await expect(help).toContainText(guide.outcome);
+    for (const item of guide.steps)
+      await expect(
+        help.getByRole("button", { name: item.title, exact: true }),
+      ).toBeVisible();
+    await help.getByText("Walk me through it", { exact: false }).click();
+    for (let index = 0; index < guide.steps.length; index++) {
+      const item = guide.steps[index];
+      await expect(
+        help.getByRole("heading", { name: item.title, exact: true }),
+      ).toBeVisible();
+      await expect(
+        help.getByText(item.instruction, { exact: true }),
+      ).toBeVisible();
+      await expect(help.locator(".pg-result")).toContainText(item.result);
+      await expect(page.locator(item.selector).first()).toBeAttached();
+      await help
+        .getByRole("button", { name: "Show this control", exact: true })
+        .click();
+      await expect(page.locator(item.selector).first()).toHaveClass(
+        /guide-target/,
+      );
+      await expect(help.locator(".pg-feedback")).toContainText(
+        "has not been activated",
+      );
+      await expect(
+        help.getByRole("button", { name: "Back", exact: true }),
+      ).toBeEnabled({ enabled: index !== 0 });
+      if (index < guide.steps.length - 1)
+        await help.getByRole("button", { name: "Next", exact: true }).click();
+      else
+        await expect(
+          help.getByRole("button", { name: "Next", exact: true }),
+        ).toBeDisabled();
+    }
+    await help
+      .getByText("What is real, and what is a demo?", { exact: false })
+      .click();
+    await expect(help.getByText(guide.boundary, { exact: true })).toBeVisible();
+  });
+}
+
+test("friendly search also accepts the familiar technical page name", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await page
+    .getByRole("button", { name: "Search workspace", exact: true })
+    .click();
+  const search = page.getByRole("dialog", {
+    name: "Search workspace",
+    exact: true,
+  });
+  await search
+    .getByPlaceholder("Where would you like to go?")
+    .fill("WebSocket");
+  await search
+    .getByRole("button", {
+      name: pageGuides.diagnostics.simpleTitle,
+      exact: true,
+    })
+    .click();
+  await expect(page.locator("main h1")).toHaveText(
+    pageGuides.diagnostics.simpleTitle,
+  );
+});
+
+test("page help can be hidden and shown; glossary defines selected terms", async ({
+  page,
+}) => {
+  await page.goto("./#diagnostics");
+  const help = page.getByRole("region", {
+    name: `How to use ${pageGuides.diagnostics.simpleTitle}`,
+    exact: true,
+  });
+  await page
+    .getByRole("button", { name: "Hide page help", exact: true })
+    .click();
+  await expect(help).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Show page help", exact: true })
+    .click();
+  await expect(help).toBeVisible();
+  await help.getByText("Explain an unfamiliar word", { exact: true }).click();
+  for (const entry of glossary) {
+    const term = help.getByRole("button", { name: entry.term, exact: true });
+    await term.click();
+    await expect(term).toHaveAttribute("aria-pressed", "true");
+    await expect(help.locator(".pg-definition")).toContainText(
+      entry.definition,
+    );
+  }
+});
+
+test("guide highlights and focuses controls without activating a practice call", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("./#agent");
+  const help = page.getByRole("region", {
+    name: `How to use ${pageGuides.agent.simpleTitle}`,
+    exact: true,
+  });
+  await help
+    .getByRole("button", { name: "Choose a situation", exact: true })
+    .click();
+  await help
+    .getByRole("button", { name: "Show this control", exact: true })
+    .click();
+  await expect(page.getByLabel("Scenario", { exact: true })).toBeFocused();
+  await expect(page.locator(".guide-target")).toHaveCount(1);
+  await help.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.locator(".guide-target")).toHaveCount(0);
+  await help
+    .getByRole("button", { name: "Show this control", exact: true })
+    .click();
+  const start = page.getByRole("button", { name: "Start call", exact: true });
+  await expect(start).toBeFocused();
+  await expect(start).toHaveClass(/guide-target/);
+  await expect(
+    page.getByRole("button", { name: "End call", exact: true }),
+  ).toHaveCount(0);
+  await expect(help.locator(".pg-feedback")).toContainText(
+    "has not been activated",
+  );
+  await page
+    .locator("nav")
+    .getByRole("button", {
+      name: pageGuides.knowledge.simpleTitle,
+      exact: true,
+    })
+    .click();
+  await expect(page.locator(".guide-target")).toHaveCount(0);
+  await expect(
+    page
+      .getByRole("region", {
+        name: `How to use ${pageGuides.knowledge.simpleTitle}`,
+      })
+      .locator(".pg-details")
+      .first(),
+  ).not.toHaveAttribute("open", "");
+});
+
+test("theme choice survives reload and takes precedence over the system", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("./");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page
+    .getByRole("button", { name: "Switch to dark theme", exact: true })
+    .click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(
+    page.getByRole("button", { name: "Switch to light theme", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Switch to light theme", exact: true })
+    .click();
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+});
+
+test("system theme follows live system changes and effects preference persists", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  await page.goto("./");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.getByLabel("Display settings", { exact: true }).click();
+  await page.getByLabel("Color theme", { exact: true }).selectOption("dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.getByLabel("Color theme", { exact: true }).selectOption("system");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  const effects = page.getByRole("checkbox", {
+    name: "Gentle visual effects",
+    exact: true,
+  });
+  await effects.uncheck();
+  await expect(page.locator("html")).toHaveAttribute("data-effects", "off");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-effects", "off");
+  await page.getByLabel("Display settings", { exact: true }).click();
+  await expect(effects).not.toBeChecked();
+  await effects.check();
+  await expect(page.locator("html")).toHaveAttribute("data-effects", "on");
+  expect(
+    await page
+      .locator(".pg-guide")
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe("none");
+});
+
+test("dark theme retains accessible contrast in navigation, controls and help", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("./#diagnostics");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa"])
+    .analyze();
+  expect(
+    results.violations.map((v) => ({
+      id: v.id,
+      nodes: v.nodes.map((n) => n.html),
+    })),
+  ).toEqual([]);
 });
