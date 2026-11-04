@@ -4392,3 +4392,37 @@ html[data-theme="dark"] .qa-evidence p {
   background: var(--surface-alt);
   color: var(--body);
 }
+@media print {
+  html[data-theme="dark"] {
+    --surface: #fff;
+    --surface-alt: #fff;
+    --ink: #17202b;
+    --body: #17202b;
+    --muted: #333;
+    --line: #bbb;
+    --accent: #333;
+    --accent-ink: #222;
+    --accent-tint: #fff;
+  }
+  html[data-theme="dark"]
+    #main
+    :is(
+      section,
+      article,
+      details,
+      summary,
+      p,
+      pre,
+      table,
+      thead,
+      th,
+      td,
+      .notice,
+      .rule,
+      .pill
+    ) {
+    background: #fff !important;
+    color: #17202b !important;
+    box-shadow: none !important;
+  }
+}
