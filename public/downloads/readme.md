@@ -1,21 +1,26 @@
-# Balto (original baseline README)
+# Balto Evidence Lab - candidate demonstration
 
-Historical source snapshot. For the 2026-11-03 React/TypeScript/Vite upgrade use `npm install`, `npm run dev`, `npm test` and `npm run build`. Static `dist` deployment runs through `.github/workflows/pages.yml`; both index.html and library.html are preserved. The current presentation has 15 slides. Check deployment-guide.md and the current repository README for updated release status; older statements below are retained as baseline provenance.
+Updated 2026-11-04. React/TypeScript and Vite power the local demonstration. Use `npm install`, `npm run dev`, `npm test` and `npm run build`. The static `dist` build deploys through `.github/workflows/pages.yml`; both index.html and library.html are preserved. The presentation has 15 slides. See test-evidence.md for dated verification snapshots; a change description alone is not a passing test or deployment claim.
 
 **Independent portfolio demonstration** for the Technical Support & AI Engineer take-home exercise. Not affiliated with Balto, Frontier, or Northwind.
 
 ## What is included
-- `index.html`: standalone responsive white-and-gold investigation dashboard, browser-side log classifier, prioritized hypotheses and checklists
+- React/TypeScript investigation dashboard, browser-side log classifier, hypotheses and checklists.
+- Shared in-memory investigation input: accepted local log text supplies the diagnostics and source-grounded deterministic copilot. This is current-tab state, not a persistent evidence database or external model.
+- Conservative connection exploration: explicitly supplied connection/session identifiers define correlation groups. Missing identifiers remain unknown; neighboring events do not prove a shared connection or total outage duration.
+- Distinct scripted call scenarios and transcript-based QA rules. QA explanations refer to visible transcript evidence and editable criteria, not invented customer performance or a trained model.
 - `src/analyzer.py`: deterministic Python event parser
 - `tests/test_analyzer.py`: regression tests
 - `data/example.log`: anonymized exercise-derived sample
 - `docs/`: assessment reasoning, research, architecture, implementation roadmap, timed demo script and acquisition plan
-- `vercel.json`: static hosting configuration
+- `public/downloads/`: assessment/research PDFs, editable PPTX/XLSX and companion source documents
 
 ## Run locally
 ```bash
-python -m http.server 8000
-# open http://localhost:8000
+npm install
+npm run dev
+npm test
+npm run build
 python -m unittest discover -s tests -v
 python src/analyzer.py data/example.log
 ```
@@ -27,7 +32,7 @@ A repeated audio websocket keepalive timeout is confirmed. The cause is **not** 
 This repository intentionally contains no applicant email links, private customer logs, credentials, or actual customer data. Assumptions and limitations are labeled. Product names are used descriptively.
 
 ## Deployment
-Static site: import this repository to Vercel with framework **Other** and no build command, or enable GitHub Pages. GitHub repository visibility alone does not mean the website has been deployed.
+GitHub Pages uses the built `dist` directory via GitHub Actions. Repository visibility and local test success alone do not establish a live deployment. Preserve the existing root and library.html destinations and verify public downloads after publishing.
 
 ## Sources
 - https://www.balto.ai/ai-info-page/

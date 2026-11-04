@@ -1,4 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { ConnectionExplorer } from "./connection-explorer";
+import {
+  createEvidenceWorkspace,
+  editEvidenceWorkspace,
+  analyzeEvidenceWorkspace,
+  buildEvidenceDraft,
+  previewEvidence,
+  draftModes,
+  syntheticConnectionLog,
+} from "./evidence-workspace";
+import type { EvidenceWorkspace, DraftMode } from "./evidence-workspace";
+import { extractScenarioQA } from "./scenarios";
+import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
   Activity,
@@ -211,6 +223,16 @@ function App() {
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState("");
   const [walk, setWalk] = useState(false);
+  const [evidence, setEvidence] = useState(() =>
+    createEvidenceWorkspace(sampleLog, "Bundled exercise excerpt"),
+  );
+  const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
+  const [evidenceFocusRequest, setEvidenceFocusRequest] = useState(0);
+  const selectEvidence = (id: string) => {
+    setSelectedEvidence(id);
+    setEvidenceFocusRequest((n) => n + 1);
+  };
+  useEffect(() => setSelectedEvidence(null), [evidence.revision]);
   const go = (id: string) => {
     setPage(id);
     location.hash = id;
@@ -432,9 +454,26 @@ function App() {
                 ) : page === "incident" ? (
                   <Incident go={go} notify={notify} />
                 ) : page === "diagnostics" ? (
-                  <Diagnostics notify={notify} />
+                  <Diagnostics
+                    notify={notify}
+                    workspace={evidence}
+                    setWorkspace={setEvidence}
+                    selectedEvidence={selectedEvidence}
+                    onSelectEvidence={selectEvidence}
+                    focusRequest={evidenceFocusRequest}
+                    go={go}
+                  />
                 ) : page === "copilot" ? (
-                  <Copilot notify={notify} />
+                  <Copilot
+                    notify={notify}
+                    workspace={evidence}
+                    selectedEvidence={selectedEvidence}
+                    onSelectEvidence={(id) => {
+                      selectEvidence(id);
+                      go("diagnostics");
+                    }}
+                    go={go}
+                  />
                 ) : page === "presentation" ? (
                   <Slides />
                 ) : page === "library" ? (
@@ -573,7 +612,7 @@ const descriptions: Record<string, string> = {
   insights:
     "Explore patterns across a reproducible synthetic dataset. No customer performance data.",
   incident:
-    "An evidence-first investigation of intermittent connection interruptions.",
+    "The bundled assessment exercise. Imported logs remain separate in Diagnostics and the Copilot.",
   diagnostics:
     "Turn raw logs into a clear, traceable event timeline. Files stay in your browser.",
   copilot:
@@ -938,22 +977,15 @@ function AgentLab({ notify }: { notify: (s: string) => void }) {
   const [checks, setChecks] = useState<boolean[]>([false, false, false, false]);
   const steps = scenarioSteps(scenario);
   const knowledge =
-    articles[
-      scenario === "Technical troubleshooting"
-        ? 2
-        : scenario === "Insurance inquiry"
-          ? 4
-          : scenario === "Payment collection"
-            ? 5
-            : scenario === "Cancellation request"
-              ? 1
-              : scenario === "Subscription renewal"
-                ? 6
-                : scenario === "Customer frustration" ||
-                    scenario === "Supervisor escalation"
-                  ? 3
-                  : 0
-    ];
+    articles.find((a) => a.id === steps.find((s) => s.articleId)?.articleId) ||
+    articles[0];
+  const visibleSteps = state === "idle" ? [] : steps.slice(0, step + 1);
+  const latestFollowUp = [...visibleSteps]
+    .reverse()
+    .find((s) => s.followUp)?.followUp;
+  const supervisorAlert = [...visibleSteps]
+    .reverse()
+    .find((s) => s.supervisorAlert)?.supervisorAlert;
   useEffect(() => {
     if (state !== "active") return;
     const t = setInterval(() => setElapsed((v) => v + 1), 1000);
@@ -969,7 +1001,7 @@ function AgentLab({ notify }: { notify: (s: string) => void }) {
   }, [state, scenario]);
   const act = (a: string) => {
     setState((s) => nextCallState(s, a));
-    if (a === "start") {
+    if (a === "start" || a === "reset") {
       setStep(0);
       setElapsed(0);
       setChecks([false, false, false, false]);
@@ -981,6 +1013,7 @@ function AgentLab({ notify }: { notify: (s: string) => void }) {
         <label>
           Scenario{" "}
           <select
+            aria-label="Scenario"
             value={scenario}
             disabled={state === "active" || state === "paused"}
             onChange={(e) => {
@@ -1108,9 +1141,33 @@ function AgentLab({ notify }: { notify: (s: string) => void }) {
             <div className="guidance-tags">
               <Pill tone="neutral">{scenario}</Pill>
               <Pill tone="green">
-                {step < 2 ? "Sentiment: uncertain" : "Sentiment: improving"}
+                {state === "idle"
+                  ? "Sentiment: not started"
+                  : `Sentiment: ${steps[step].sentiment || "unknown"}`}
               </Pill>
             </div>
+            {state !== "idle" && steps[step].objection && (
+              <div className="scenario-cue">
+                <b>Customer objection</b>
+                <p>{steps[step].objection}</p>
+              </div>
+            )}
+            {state !== "idle" && latestFollowUp && (
+              <div className="scenario-cue">
+                <b>Suggested follow-up</b>
+                <p>{latestFollowUp}</p>
+              </div>
+            )}
+            {state !== "idle" && supervisorAlert && (
+              <div className="notice" role="status">
+                <AlertTriangle size={16} />
+                <span>
+                  <b>Simulated supervisor recommendation</b>
+                  <br />
+                  {supervisorAlert} No alert was sent.
+                </span>
+              </div>
+            )}
             <small>Rule-based suggestions · Scripted sentiment</small>
           </Panel>
           <Panel>
@@ -1160,6 +1217,9 @@ function AgentLab({ notify }: { notify: (s: string) => void }) {
                         elapsed,
                         events: steps.slice(0, step + 1),
                         completedChecklist: checks,
+                        followUp: latestFollowUp || null,
+                        supervisorRecommendation: supervisorAlert || null,
+                        feedback: extractScenarioQA(scenario, visibleSteps),
                       },
                       null,
                       2,
@@ -1180,8 +1240,9 @@ function AgentLab({ notify }: { notify: (s: string) => void }) {
             items marked by the user.
           </p>
           <p>
-            <b>Next action:</b> Document the request, verify authorization, and
-            confirm a follow-up.{" "}
+            <b>Next action:</b>{" "}
+            {latestFollowUp ||
+              "The call ended before scenario-specific follow-up instructions were stated. Review the next unshown stage before planning an action."}{" "}
             {step < 5
               ? "The call ended before all scripted events were shown."
               : "All scripted events were shown; no production action occurred."}
@@ -1326,30 +1387,28 @@ function Knowledge() {
 }
 function QA() {
   const [scenario, setScenario] = useState(scenarioNames[0]);
-  const [rules, setRules] = useState([
-    { label: "Recording disclosure", term: "recorded", weight: 20, pass: true },
-    {
-      label: "Identity verification",
-      term: "verify your identity",
-      weight: 30,
-      pass: true,
-    },
-    {
-      label: "Acknowledgment and empathy",
-      term: "frustrating",
-      weight: 20,
-      pass: true,
-    },
-    {
-      label: "Explicit follow-up commitment",
-      term: "business day",
-      weight: 30,
-      pass: false,
-    },
-  ]);
+  const [excerpt, setExcerpt] = useState("Complete scripted call");
+  const [overrides, setOverrides] = useState<
+    Record<string, { pass?: boolean; weight?: number }>
+  >({});
   const [reviewed, setReviewed] = useState(false);
+  const steps = scenarioSteps(scenario).slice(
+    0,
+    excerpt === "Complete scripted call" ? 6 : 4,
+  );
+  const detected = extractScenarioQA(scenario, steps);
+  const rules = detected.map((r) => ({
+    ...r,
+    detectedPass: r.pass,
+    pass: overrides[r.id]?.pass ?? r.pass,
+    weight: overrides[r.id]?.weight ?? r.weight,
+    overridden: overrides[r.id]?.pass !== undefined,
+  }));
   const score = qaScore(rules);
-  const steps = scenarioSteps(scenario);
+  const reset = () => {
+    setOverrides({});
+    setReviewed(false);
+  };
   return (
     <>
       <div className="toolbar">
@@ -1359,12 +1418,25 @@ function QA() {
             value={scenario}
             onChange={(e) => {
               setScenario(e.target.value);
-              setReviewed(false);
+              reset();
             }}
           >
-            {scenarioNames.map((x) => (
-              <option key={x}>{x}</option>
+            {scenarioNames.map((s) => (
+              <option key={s}>{s}</option>
             ))}
+          </select>
+        </label>
+        <label>
+          Transcript scope{" "}
+          <select
+            value={excerpt}
+            onChange={(e) => {
+              setExcerpt(e.target.value);
+              reset();
+            }}
+          >
+            <option>Complete scripted call</option>
+            <option>Incomplete excerpt (T1–T4)</option>
           </select>
         </label>
         <span className="toolbar-spacer" />
@@ -1376,11 +1448,12 @@ function QA() {
               JSON.stringify(
                 {
                   scenario,
+                  excerpt,
                   score,
                   rules,
                   reviewed,
                   method:
-                    "Visible weighted checklist; human override available",
+                    "Visible agent utterance phrase rules; human overrides are explicit; no semantic compliance claim",
                 },
                 null,
                 2,
@@ -1400,7 +1473,7 @@ function QA() {
             action={<Pill tone="neutral">SIMULATED</Pill>}
           />
           {steps.map((s, i) => (
-            <div className="review-line" key={i}>
+            <div className="review-line" id={"qa-T" + (i + 1)} key={i}>
               <code>T{i + 1}</code>
               <div>
                 <b>{s.speaker}</b>
@@ -1408,6 +1481,13 @@ function QA() {
               </div>
             </div>
           ))}
+          {excerpt !== "Complete scripted call" && (
+            <div className="notice">
+              Only T1–T4 are supplied to this evaluation. Missing phrases are
+              unobserved in this excerpt; they are not proof of a real agent
+              failure.
+            </div>
+          )}
         </Panel>
         <Panel>
           <div className="score-circle">
@@ -1419,18 +1499,19 @@ function QA() {
           </div>
           <SectionHead
             title="Make the rules visible."
-            description="Checkboxes allow human override. Weights determine the score."
+            description="Initial scores use visible agent utterances. Reviewers can override each result or weight."
           />
-          {rules.map((r, i) => (
-            <div className="rule" key={r.label}>
+          {rules.map((r) => (
+            <div className="rule" key={r.id}>
               <label>
                 <input
                   type="checkbox"
                   checked={r.pass}
                   onChange={() => {
-                    setRules((v) =>
-                      v.map((x, j) => (j === i ? { ...x, pass: !x.pass } : x)),
-                    );
+                    setOverrides((v) => ({
+                      ...v,
+                      [r.id]: { ...v[r.id], pass: !r.pass },
+                    }));
                     setReviewed(false);
                   }}
                 />
@@ -1438,10 +1519,12 @@ function QA() {
               </label>
               <div>
                 <small>
-                  {steps.some((s) => s.text.toLowerCase().includes(r.term))
-                    ? `Detected in T${steps.findIndex((s) => s.text.toLowerCase().includes(r.term)) + 1}`
-                    : "Required phrase not detected"}{" "}
-                  · “{r.term}”
+                  {r.detectedPass
+                    ? "Detected in " + r.evidence.join(", ")
+                    : "Required phrase not observed"}
+                  {r.overridden ? " · HUMAN OVERRIDE" : ""}
+                  <br />
+                  {r.description}
                 </small>
                 <input
                   type="number"
@@ -1450,37 +1533,45 @@ function QA() {
                   aria-label={r.label + " weight"}
                   value={r.weight}
                   onChange={(e) => {
-                    setRules((v) =>
-                      v.map((x, j) =>
-                        i === j
-                          ? {
-                              ...x,
-                              weight: Math.max(
-                                0,
-                                Math.min(100, Number(e.target.value)),
-                              ),
-                            }
-                          : x,
-                      ),
+                    const weight = Math.max(
+                      0,
+                      Math.min(100, Number(e.target.value)),
                     );
+                    setOverrides((v) => ({
+                      ...v,
+                      [r.id]: { ...v[r.id], weight },
+                    }));
                     setReviewed(false);
                   }}
                 />
               </div>
+              {r.evidence.map((id, i) => (
+                <details className="qa-evidence" key={id}>
+                  <summary>{id} · exact matched utterance</summary>
+                  <p>{r.evidenceText[i]}</p>
+                </details>
+              ))}
             </div>
           ))}
           <p className="formula">
             Score = passed weight ÷ total weight × 100.
             <br />
-            Phrase detection is a demonstration, not semantic compliance
-            evaluation.
+            Rules check only visible Agent text, not customer claims, metadata,
+            or unshown stages. A verification request does not prove identity
+            was verified.
           </p>
-          <Button onClick={() => setReviewed(!reviewed)}>
-            <CheckCheck size={16} />
-            {reviewed
-              ? "Reviewed — click to reopen"
-              : "Mark human review complete"}
-          </Button>
+          <div className="button-row">
+            <Button onClick={() => setReviewed(!reviewed)}>
+              <CheckCheck size={16} />
+              {reviewed
+                ? "Reviewed — click to reopen"
+                : "Mark human review complete"}
+            </Button>
+            <Button secondary onClick={reset}>
+              <RotateCcw size={15} />
+              Reset overrides
+            </Button>
+          </div>
         </Panel>
       </div>
     </>
@@ -2255,13 +2346,49 @@ function Incident({
     </>
   );
 }
-function Diagnostics({ notify }: { notify: (s: string) => void }) {
-  const [input, setInput] = useState(sampleLog);
-  const [parsed, setParsed] = useState(parseLogs(sampleLog));
+function Diagnostics({
+  notify,
+  workspace,
+  setWorkspace,
+  selectedEvidence,
+  onSelectEvidence,
+  focusRequest,
+  go,
+}: {
+  notify: (s: string) => void;
+  workspace: EvidenceWorkspace;
+  setWorkspace: React.Dispatch<React.SetStateAction<EvidenceWorkspace>>;
+  selectedEvidence: string | null;
+  focusRequest: number;
+  onSelectEvidence: (id: string) => void;
+  go: (id: string) => void;
+}) {
+  const input = workspace.input,
+    parsed = workspace.events;
+  const reads = useRef(0);
+  useEffect(
+    () => () => {
+      reads.current++;
+    },
+    [],
+  );
+  const setInput = (text: string, label = "Local pasted log") => {
+    reads.current++;
+    setWorkspace((prev) => editEvidenceWorkspace(prev, text, label));
+  };
+  const [pendingFocus, setPendingFocus] = useState<string | null>(null);
+  useEffect(() => {
+    setPendingFocus(selectedEvidence);
+    if (selectedEvidence) {
+      setQuery("");
+      setChannel("All channels");
+      setSeverity("All severities");
+    }
+  }, [selectedEvidence, focusRequest]);
   const [query, setQuery] = useState("");
   const [channel, setChannel] = useState("All channels");
   const [severity, setSeverity] = useState("All severities");
-  const [error, setError] = useState("");
+  const error = workspace.error;
   const [anonymize, setAnonymize] = useState(false);
   const displayed = parsed.filter(
     (e) =>
@@ -2269,17 +2396,33 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
       (severity === "All severities" || e.severity === severity) &&
       e.raw.toLowerCase().includes(query.toLowerCase()),
   );
-  const run = (text = input) => {
-    try {
-      setParsed(parseLogs(text));
-      setError("");
-      notify(
-        "Parsed locally. " + parseLogs(text).length + " evidence entries.",
-      );
-    } catch (e) {
-      setParsed([]);
-      setError((e as Error).message);
+  const selectedIndex = displayed.findIndex((e) => e.id === selectedEvidence);
+  const viewStart =
+    selectedIndex >= 500 ? Math.floor(selectedIndex / 500) * 500 : 0;
+  const visibleEvents = displayed.slice(viewStart, viewStart + 500);
+  useEffect(() => {
+    if (
+      pendingFocus &&
+      query === "" &&
+      channel === "All channels" &&
+      severity === "All severities"
+    ) {
+      const row = document.getElementById("diagnostic-" + pendingFocus);
+      if (row) {
+        row.scrollIntoView({ block: "center" });
+        setPendingFocus(null);
+      }
     }
+  }, [pendingFocus, query, channel, severity, parsed]);
+  const run = (text?: string, label?: string) => {
+    setWorkspace((prev) =>
+      analyzeEvidenceWorkspace(
+        text === undefined
+          ? prev
+          : editEvidenceWorkspace(prev, text, label || prev.label),
+      ),
+    );
+    notify("Analysis updated locally. Review the source status and entries.");
   };
   const safe = (s: string) =>
     anonymize
@@ -2290,6 +2433,21 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
       : s;
   return (
     <>
+      <div className="notice">
+        <ShieldCheck size={18} />
+        <span>
+          <b>
+            Active source: {workspace.label} · revision {workspace.revision}
+          </b>
+          <br />
+          {workspace.analyzed
+            ? "Analyzed locally; available to the Investigation Copilot."
+            : "Input changed or analysis failed. Drafts and source findings are invalid until this input is analyzed."}
+        </span>
+        <button className="text-btn" onClick={() => go("copilot")}>
+          Open copilot <ArrowRight size={15} />
+        </button>
+      </div>
       <Panel>
         <SectionHead
           title="From raw input to useful evidence"
@@ -2302,17 +2460,38 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
                 className="file-input"
                 type="file"
                 accept=".log,.txt,.json"
+                aria-label="Upload log file"
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
                   if (!f) return;
+                  const request = ++reads.current;
                   if (f.size > 1024 * 1024) {
-                    setParsed([]);
-                    setError("Maximum input is 1 MB.");
+                    setWorkspace((prev) => ({
+                      ...editEvidenceWorkspace(prev, "", "Uploaded " + f.name),
+                      error: "Maximum input is 1 MB.",
+                    }));
                     return;
                   }
-                  const text = await f.text();
-                  setInput(text);
-                  run(text);
+                  try {
+                    const text = await f.text();
+                    if (request !== reads.current) return;
+                    setWorkspace((prev) =>
+                      analyzeEvidenceWorkspace(
+                        editEvidenceWorkspace(prev, text, "Uploaded " + f.name),
+                      ),
+                    );
+                  } catch {
+                    if (request === reads.current)
+                      setWorkspace((prev) => ({
+                        ...editEvidenceWorkspace(
+                          prev,
+                          "",
+                          "Uploaded " + f.name,
+                        ),
+                        error:
+                          "Unable to read this file. Try a plain-text log.",
+                      }));
+                  }
                 }}
               />
             </label>
@@ -2324,9 +2503,9 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
-            setParsed([]);
           }}
           spellCheck={false}
+          wrap="off"
         />
         <div className="button-row">
           <Button onClick={() => run()}>
@@ -2336,11 +2515,20 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
           <Button
             secondary
             onClick={() => {
-              setInput(sampleLog);
-              run(sampleLog);
+              reads.current++;
+              run(sampleLog, "Bundled exercise excerpt");
             }}
           >
             Load exercise excerpt
+          </Button>
+          <Button
+            secondary
+            onClick={() => {
+              reads.current++;
+              run(syntheticConnectionLog, "Synthetic connection example");
+            }}
+          >
+            Load connection example (synthetic)
           </Button>
           <label className="check-row inline">
             <input
@@ -2406,7 +2594,11 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
             download(
               "log-evidence.json",
               JSON.stringify(
-                displayed.map((e) => ({ ...e, raw: safe(e.raw) })),
+                {
+                  source: workspace.label,
+                  revision: workspace.revision,
+                  events: displayed.map((e) => ({ ...e, raw: safe(e.raw) })),
+                },
                 null,
                 2,
               ),
@@ -2424,6 +2616,8 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
               "log-evidence.csv",
               toCSV(
                 [
+                  "Source",
+                  "Revision",
                   "Evidence",
                   "Source time",
                   "Normalized UTC",
@@ -2433,6 +2627,8 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
                   "Source",
                 ],
                 displayed.map((e) => [
+                  workspace.label,
+                  workspace.revision,
                   e.id,
                   e.time,
                   e.utc,
@@ -2454,6 +2650,13 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
           title={`${displayed.length} visible events`}
           description={`${parsed.filter((e) => e.kind === "audio_keepalive_timeout").length} timeout(s) · ${parsed.filter((e) => e.kind === "duplicate_socket").length} duplicate socket event(s). Counts describe the parsed input, not a confirmed diagnosis.`}
         />
+        {displayed.length > 500 && (
+          <div className="notice">
+            Showing entries {viewStart + 1}–{viewStart + visibleEvents.length}{" "}
+            of {displayed.length} filtered entries. Search or filter to narrow
+            the view. JSON and CSV exports include every filtered entry.
+          </div>
+        )}
         <div className="table-scroll">
           <table className="evidence-table">
             <thead>
@@ -2466,10 +2669,22 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
               </tr>
             </thead>
             <tbody>
-              {displayed.map((e) => (
-                <tr key={e.id}>
+              {visibleEvents.map((e) => (
+                <tr
+                  key={e.id}
+                  id={"diagnostic-" + e.id}
+                  className={
+                    selectedEvidence === e.id ? "selected-evidence" : ""
+                  }
+                >
                   <td>
-                    <code>{e.id}</code>
+                    <button
+                      className="text-btn"
+                      aria-label={"Select evidence " + e.id}
+                      onClick={() => onSelectEvidence(e.id)}
+                    >
+                      {e.id}
+                    </button>
                   </td>
                   <td>{e.time}</td>
                   <td>{e.channel}</td>
@@ -2479,7 +2694,7 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
                     </Pill>
                   </td>
                   <td>
-                    <code>{safe(e.raw)}</code>
+                    <code>{previewEvidence(safe(e.raw))}</code>
                     <small>
                       {e.utc ||
                         "UTC unresolved: source lacks explicit year/timezone or timestamp is invalid"}
@@ -2494,6 +2709,19 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
           )}
         </div>
       </Panel>
+      {!anonymize && (
+        <ConnectionExplorer
+          events={parsed}
+          onSelectEvidence={onSelectEvidence}
+        />
+      )}
+      {anonymize && (
+        <div className="notice">
+          Connection sequences are hidden during anonymization preview so raw
+          identifiers do not bypass the preview. Review source labels and all
+          exports before sharing.
+        </div>
+      )}
       <div className="notice">
         <AlertTriangle size={18} />
         <span>
@@ -2505,95 +2733,176 @@ function Diagnostics({ notify }: { notify: (s: string) => void }) {
     </>
   );
 }
-function Copilot({ notify }: { notify: (s: string) => void }) {
-  const [mode, setMode] = useState("Incident summary");
+function Copilot({
+  notify,
+  workspace,
+  selectedEvidence,
+  onSelectEvidence,
+  go,
+}: {
+  notify: (s: string) => void;
+  workspace: EvidenceWorkspace;
+  selectedEvidence: string | null;
+  onSelectEvidence: (id: string) => void;
+  go: (id: string) => void;
+}) {
+  const [mode, setMode] = useState<DraftMode>("Incident summary");
   const [reviewed, setReviewed] = useState(false);
-  const texts: Record<string, string> = {
-    "Incident summary":
-      "OBSERVATIONS\nThree audio ping/pong timeouts appear at L1, L4, L8. A control disconnect/reconnect pair appears at L2–L3, separated by 3.203 seconds. A duplicate socket event appears at L5. One START_CALL appears at L7.\n\nHYPOTHESES\nNetwork-path interruption, endpoint/runtime delay, reconnection handling, or backend instability remain possible. No root cause is established.\n\nMISSING EVIDENCE\nConnection IDs, close codes, ping thresholds, client environment, precise symptom times, and affected-user scope.",
-    "Customer update":
-      "DRAFT — HUMAN REVIEW REQUIRED\nThanks for the details. We confirmed intermittent audio connection timeouts in the supplied logs [L1, L4, L8]. We have not confirmed the cause or whether the missing templates share the same trigger. We are proposing a review of both connection paths [L2–L3] and an IT-approved network comparison. Please provide two recent occurrence times with timezone and the exact reinstall error. No action has been taken by this tool.",
-    "Engineering escalation":
-      "DRAFT ENGINEERING HANDOFF\nImpact: reported reconnect banner and missing templates; scope unverified.\nEvidence: L1/L4/L8 audio timeouts; L2/L3 control reconnect; L5 duplicate socket; L6/L9 CHECK_START_CALL; L7 START_CALL.\nRequested investigation: correlate control/audio session IDs, expected duplicate semantics, close codes, call outcomes, and client/server version history.\nReproduction: not yet established. Root cause: unknown. No fix verified.",
-    "Diagnostic checklist":
-      "[ ] Obtain occurrence times and timezone.\n[ ] Confirm consent and sanitize support bundle.\n[ ] Correlate audio/control connection IDs against L1–L9.\n[ ] Obtain exact reinstall error.\n[ ] Review wider service impact.\n[ ] Coordinate approved one-variable network comparison with IT.\n[ ] Verify templates and recording across representative calls.\n[ ] Record rollback, observation window, and customer confirmation.",
-  };
+  const [selected, setSelected] = useState(
+    selectedEvidence || workspace.events[0]?.id || "",
+  );
+  useEffect(() => {
+    setReviewed(false);
+    setSelected(selectedEvidence || workspace.events[0]?.id || "");
+  }, [workspace.revision, selectedEvidence]);
+  const selectable = workspace.events.slice(0, 500);
+  const currentSelection = workspace.events.find((e) => e.id === selected);
+  if (currentSelection && !selectable.some((e) => e.id === selected))
+    selectable.push(currentSelection);
+  const text = buildEvidenceDraft(mode, workspace, selected);
+  const ready = workspace.analyzed && workspace.events.length > 0;
   return (
-    <div className="two-col">
-      <Panel>
-        <div className="large-icon gold">
-          <Sparkles />
-        </div>
-        <h2>
-          Useful structure.
+    <>
+      <div className="notice">
+        <ShieldCheck size={18} />
+        <span>
+          <b>
+            Active source: {workspace.label} · revision {workspace.revision}
+          </b>
           <br />
-          Honest boundaries.
-        </h2>
-        <p>
-          This assistant formats the nine supplied log entries and assessment
-          context into reviewable drafts. It uses deterministic templates and
-          cannot take actions.
-        </p>
-        <div className="small-eyebrow">CHOOSE A DRAFT</div>
-        {Object.keys(texts).map((t) => (
-          <button
-            key={t}
-            className={"article-row " + (mode === t ? "selected" : "")}
-            onClick={() => {
-              setMode(t);
-              setReviewed(false);
-            }}
-          >
-            <FileText size={18} />
-            <b>{t}</b>
-            <ArrowRight size={15} />
-          </button>
-        ))}
-        <Pill tone="neutral">NO LLM CONNECTED</Pill>
-      </Panel>
-      <Panel>
-        <SectionHead
-          title={mode}
-          action={
-            <Pill tone={reviewed ? "green" : "gold"}>
-              {reviewed ? "HUMAN REVIEWED" : "DRAFT"}
-            </Pill>
-          }
-        />
-        <pre className="report-text">{texts[mode]}</pre>
-        <div className="button-row">
-          <Button
-            secondary
-            onClick={() =>
-              navigator.clipboard
-                .writeText(texts[mode])
-                .then(() => notify("Draft copied"))
-                .catch(() =>
-                  notify("Clipboard unavailable. Select the visible text."),
-                )
+          {workspace.analyzed
+            ? `${workspace.events.length} parsed entries. Drafts cite only this source.`
+            : "Analysis unavailable. Edit or analyze the current input in Diagnostics."}{" "}
+          Exercise-specific reported symptoms remain in the separate assessment.
+        </span>
+        <button className="text-btn" onClick={() => go("diagnostics")}>
+          Change source <ArrowRight size={15} />
+        </button>
+      </div>
+      <div className="two-col">
+        <Panel>
+          <div className="large-icon gold">
+            <Sparkles />
+          </div>
+          <h2>
+            Useful structure.
+            <br />
+            Honest boundaries.
+          </h2>
+          <p>
+            This assistant formats the active parsed evidence into reviewable
+            drafts. It uses deterministic templates, runs locally, and cannot
+            take actions. Imported text is not stored after this app is closed
+            or reloaded.
+          </p>
+          <div className="small-eyebrow">CHOOSE A DRAFT</div>
+          {draftModes.map((t) => (
+            <button
+              key={t}
+              className={"article-row " + (mode === t ? "selected" : "")}
+              onClick={() => {
+                setMode(t);
+                setReviewed(false);
+              }}
+            >
+              <FileText size={18} />
+              <b>{t}</b>
+              <ArrowRight size={15} />
+            </button>
+          ))}
+          <Pill tone="neutral">NO LLM CONNECTED</Pill>
+        </Panel>
+        <Panel>
+          <SectionHead
+            title={mode}
+            action={
+              <Pill tone={reviewed ? "green" : "gold"}>
+                {reviewed ? "HUMAN REVIEWED" : "DRAFT"}
+              </Pill>
             }
-          >
-            <Copy size={15} />
-            Copy draft
-          </Button>
-          <Button
-            secondary
-            onClick={() => download("investigation-draft.md", texts[mode])}
-          >
-            <Download size={15} />
-            Download
-          </Button>
-          <Button onClick={() => setReviewed(!reviewed)}>
-            <Check size={15} />
-            {reviewed ? "Reopen review" : "Mark reviewed"}
-          </Button>
-        </div>
-        <small>
-          All references point to source lines in the Escalation Command Center.
-          Drafts remain local.
-        </small>
-      </Panel>
-    </div>
+          />
+          {mode === "Explain selected evidence" && (
+            <label className="evidence-selector">
+              Evidence line{" "}
+              <select
+                aria-label="Evidence line to explain"
+                value={selected}
+                onChange={(e) => {
+                  setSelected(e.target.value);
+                  setReviewed(false);
+                }}
+              >
+                {selectable.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.id} · {e.kind}
+                  </option>
+                ))}
+              </select>
+              <small>
+                The first 500 entries plus the current selection are selectable
+                here; all entries remain available in Diagnostics.
+              </small>
+            </label>
+          )}
+          {mode === "Explain selected evidence" && currentSelection && (
+            <Button
+              secondary
+              onClick={() => onSelectEvidence(currentSelection.id)}
+            >
+              Open selected source line <ArrowUpRight size={14} />
+            </Button>
+          )}
+          <pre className="report-text">{text}</pre>
+          <div className="button-row">
+            <Button
+              secondary
+              disabled={!ready}
+              onClick={() =>
+                navigator.clipboard
+                  .writeText(text)
+                  .then(() => notify("Source-scoped draft copied"))
+                  .catch(() =>
+                    notify("Clipboard unavailable. Select the visible text."),
+                  )
+              }
+            >
+              <Copy size={15} />
+              Copy draft
+            </Button>
+            <Button
+              secondary
+              disabled={!ready}
+              onClick={() => download("investigation-draft.md", text)}
+            >
+              <Download size={15} />
+              Download
+            </Button>
+            <Button disabled={!ready} onClick={() => setReviewed(!reviewed)}>
+              <Check size={15} />
+              {reviewed ? "Reopen review" : "Mark reviewed"}
+            </Button>
+          </div>
+          <div className="small-eyebrow">OPEN EXACT SOURCE EVIDENCE</div>
+          <div className="evidence-citations">
+            {workspace.events.slice(0, 50).map((e) => (
+              <button
+                key={e.id}
+                title={`${workspace.label} · revision ${workspace.revision} · ${previewEvidence(e.raw)}`}
+                onClick={() => onSelectEvidence(e.id)}
+              >
+                {e.id} <ArrowUpRight size={11} />
+              </button>
+            ))}
+          </div>
+          <small>
+            References are scoped to {workspace.label}, revision{" "}
+            {workspace.revision}. Showing the first{" "}
+            {Math.min(50, workspace.events.length)} source links. No draft has
+            been sent.
+          </small>
+        </Panel>
+      </div>
+    </>
   );
 }
 interface Slide {
@@ -2760,6 +3069,7 @@ const files = [
     title: "Investigation workbook",
     desc: "10 editable sheets with evidence, formulas, and investigation tracking.",
     name: "incident-workbook.xlsx",
+    updated: "Nov 04, 2026",
     type: "XLSX",
     icon: ChartNoAxesCombined,
   },
@@ -2774,6 +3084,7 @@ const files = [
     title: "Engineering design notes",
     desc: "Implementation decisions, safety controls, and evidence handling.",
     name: "engineering-design-notes.md",
+    updated: "Nov 04, 2026",
     type: "MD",
     icon: Code2,
   },
@@ -2802,6 +3113,7 @@ const files = [
     title: "Test evidence",
     desc: "Artifact checks and documented limits. Current app checks are in CI.",
     name: "test-evidence.md",
+    updated: "Nov 04, 2026",
     type: "MD",
     icon: ShieldCheck,
   },
@@ -2835,7 +3147,7 @@ function Library() {
             behind the project.
           </p>
         </div>
-        <Pill>UPDATED NOV 03, 2026</Pill>
+        <Pill>UPDATED NOV 04, 2026</Pill>
       </div>
       <div className="toolbar">
         <b>
@@ -2870,7 +3182,7 @@ function Library() {
               <h3>{f.title}</h3>
               <p>{f.desc}</p>
               <div className="file-bottom">
-                <small>v2.0 · Nov 03, 2026</small>
+                <small>v2.0 · {f.updated || "Nov 03, 2026"}</small>
                 <a
                   href={"./downloads/" + f.name}
                   download
@@ -3094,7 +3406,15 @@ function Assessment({ notify }: { notify: (s: string) => void }) {
       <div className="toolbar">
         <Pill tone="neutral">INDEPENDENT TECHNICAL ASSESSMENT</Pill>
         <span className="toolbar-spacer" />
-        <Button secondary onClick={() => window.print()}>
+        <Button
+          secondary
+          onClick={() => {
+            document
+              .querySelectorAll<HTMLDetailsElement>(".assessment-detail")
+              .forEach((d) => (d.open = true));
+            window.print();
+          }}
+        >
           <FileText size={15} />
           Print report
         </Button>

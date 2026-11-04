@@ -154,3 +154,13 @@ Official Balto references: [Balto AI](https://www.balto.ai/) · [Docs](https://w
 *Made with focused effort by Kazi Musharraf. Independent applicant portfolio.*
 
 </div>
+
+## November 4 continuation
+
+Diagnostics and the Investigation Copilot now share one versioned, in-memory evidence source. Imports survive lab navigation; edits invalidate prior analysis, draft review and citations. Drafts count only active-source events and can explain a selected line with source/revision references. Delayed file reads are cancelled on navigation so they cannot overwrite newer evidence. The original assessment remains explicitly scoped to its bundled exercise.
+
+The connection explorer groups explicit session/client/connection/socket identifiers by channel. Session/client views never calculate transport durations. Exact transport-ID intervals require valid timezone-bearing timestamps, unambiguous lifecycle pairs and consistent additional identifiers. Close codes, unmatched events and contradictory IDs remain visible; no root cause is inferred. A separate, clearly labeled synthetic connection fixture demonstrates the controls.
+
+All eight scripts now contain distinct objections, responses, relevant articles, follow-up instructions and optional simulated supervisor recommendations. QA evaluates six visible Agent-utterance rules, exposes exact transcript matches, supports incomplete excerpts, and resets human overrides when the scenario or excerpt changes.
+
+Large-file views are bounded: 500 evidence rows per source window; selected later lines remain reachable, with full filtered CSV/JSON exports. Connection views display at most 50 groups and 100 sequence entries per group; source previews cap at 5,000 characters with an explicit notice. Input limits remain 1 MiB and 10,000 lines. Lines with more than 16 explicit identifier fields remain unassigned rather than being partially grouped.

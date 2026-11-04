@@ -24,3 +24,13 @@ Timestamp ambiguity and malformed timestamps are covered by regression tests. Ex
 No live AI, telephony, CRM or customer system is connected. No final video rendered. No measured Lighthouse score, production performance, Office application compatibility, customer resolution or calibrated probabilities are claimed. The overview trend is an explicitly illustrative SVG; calculated metrics come from the filterable synthetic call rows. File anonymization is partial and requires human review.
 
 Deployment verification belongs to the GitHub Actions run and a fresh public-site browser review; local test success alone does not establish that publication succeeded.
+
+## Continuation verification — 2026-11-04
+
+- 37 frontend domain tests passed (source-scoped drafts, conservative ID grouping, bounded parsing, eight distinct scenarios and QA evidence).
+- 11 Python tests passed unchanged.
+- 17 Playwright journeys passed, including stale asynchronous uploads, source persistence/invalidation, scenario alerts, QA reset, full 600-line exports, post-filter citation scrolling and a selected L600 explanation.
+- Automated axe WCAG 2 A/AA checks: zero violations on all 17 sections and the loaded synthetic connection view. The mobile suite checks all 17 sections at 390px.
+- TypeScript/Vite production build and diff checks passed. npm audit reported zero vulnerabilities.
+- Two-stage review included an independent source-grounding review and a different-model adversarial review. Fixes covered conflicting transport IDs, lifecycle flags, large-source limits, upload completion after unmount, post-render citation focus and out-of-window selections.
+- The downloadable workbook retains its November 3 snapshot and adds a dated November 4 verification snapshot. Published deployment is checked separately after CI; these local results alone do not claim publication.

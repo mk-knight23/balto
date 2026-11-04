@@ -3223,3 +3223,75 @@ td a {
     padding: 6px;
   }
 }
+/* Source-aware investigation and scenario feedback. */
+.evidence-citations {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.evidence-citations button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e5dcc7;
+  border-radius: 5px;
+  background: #faf6ed;
+  color: #735a2e;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.evidence-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.selected-evidence td {
+  background: #faf0d7;
+  border-bottom-color: #d5ba82;
+}
+.qa-evidence {
+  font-size: 10px;
+  padding: 7px 0 0 25px;
+  color: #6d6250;
+}
+.qa-evidence summary {
+  cursor: pointer;
+}
+.qa-evidence p {
+  font-size: 11px;
+  padding: 10px;
+  background: #faf8f3;
+  border-radius: 5px;
+}
+.scenario-cue {
+  border-top: 1px solid #e7dcc3;
+  padding-top: 12px;
+  margin: 12px 0;
+}
+.scenario-cue b {
+  color: #78613b;
+  font-size: 10px;
+}
+.scenario-cue p {
+  font-size: 11px;
+  margin: 6px 0;
+}
+@media (max-width: 700px) {
+  .notice {
+    flex-wrap: wrap;
+  }
+  .notice > .text-btn {
+    margin-left: 28px;
+  }
+  .toolbar label {
+    max-width: 100%;
+  }
+}
+.notice span,
+.notice b {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

@@ -37,9 +37,9 @@
   },
   {
     "file": "engineering-design-notes.md",
-    "bytes": 2610,
-    "sha256": "be76ff4f0b96b0cbfd3f185b1f08a60c54dfb110ecc4a8f674eede67017b0d0b",
-    "updated": "2026-11-03"
+    "bytes": 3631,
+    "sha256": "981d98b201e367551140fef14949ec631f9c2ee4b9172bd8a61ab0e704573e7a",
+    "updated": "2026-11-04"
   },
   {
     "file": "executive-deck.pptx",
@@ -49,9 +49,9 @@
   },
   {
     "file": "incident-workbook.xlsx",
-    "bytes": 21975,
-    "sha256": "552a4d17cc3a40e7ce0c9e8c5f8aa6867732787054304196b1469d01da8e11f5",
-    "updated": "2026-11-03"
+    "bytes": 22623,
+    "sha256": "d0a8b88b7bb3c16472ca8d580db3005be838ff7232680739797f6e98e0c1871b",
+    "updated": "2026-11-04"
   },
   {
     "file": "notebooklm-video-prompt.md",
@@ -61,9 +61,9 @@
   },
   {
     "file": "readme.md",
-    "bytes": 2470,
-    "sha256": "8138186f883bee16f30b81e204bc57c33b6f5f7b13a653bbe21065bcc219332a",
-    "updated": "2026-11-03"
+    "bytes": 3150,
+    "sha256": "7c5f194b51d618e7e48b154a631ee4d04af2b1b65e1d7ebc0036907e4ebedb20",
+    "updated": "2026-11-04"
   },
   {
     "file": "slide-content.json",
@@ -73,9 +73,9 @@
   },
   {
     "file": "test-evidence.md",
-    "bytes": 1864,
-    "sha256": "728a17b61e0a8dad920e70f9e8872e9fd0cc8fd13c9626f4fd04306e56540f90",
-    "updated": "2026-11-03"
+    "bytes": 3337,
+    "sha256": "95064cae12149722f1db76b2da06dddd08665e1b0a325e627bf40da350a46b43",
+    "updated": "2026-11-04"
   },
   {
     "file": "video-captions.srt",
